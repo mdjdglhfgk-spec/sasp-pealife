@@ -95,7 +95,7 @@
     </footer>
 
     <!-- SCRIPT -->
-    <script type="module">
+        <script type="module">
         import { supabase } from './js/supabase.js';
 
         let allAgents = [];
@@ -103,46 +103,63 @@
         async function fetchAgents() {
             const container = document.getElementById('agentsList');
             
+            // On récupère les données
             const { data: agents, error } = await supabase
                 .from('agents')
                 .select('*')
                 .order('nom', { ascending: true });
 
-            if (error || !agents || agents.length === 0) {
-                container.innerHTML = `<p style="color: var(--text-muted); text-align: center; grid-column: 1 / -1; padding: 40px;">Aucun agent enregistré dans le registre pour le moment.</p>`;
+            if (error) {
+                container.innerHTML = `<h2 style="color:red; grid-column: 1/-1;">ERREUR SUPABASE : ${error.message}</h2>`;
                 return;
             }
 
+            if (!agents || agents.length === 0) {
+                container.innerHTML = `<h2 style="color:white; grid-column: 1/-1;">Aucun agent trouvé dans la base.</h2>`;
+                return;
+            }
+
+            // --- TEST DE DÉBOGAGE ---
+            // On prend le premier agent pour voir ce qu'il a dans le ventre
+            const agentTest = agents[0];
+            
+            let debugHtml = `
+                <div style="grid-column: 1/-1; background: #222; border: 2px solid var(--gold); padding: 20px; margin-bottom: 20px; border-radius: 8px;">
+                    <h3 style="color: var(--gold); margin-bottom: 10px;">🛠️ DÉBOGAGE DE L'AGENT : ${agentTest.nom}</h3>
+                    <p style="color: white;"><strong>Sanctions (Données brutes) :</strong> ${JSON.stringify(agentTest.sanctions)}</p>
+                    <p style="color: white;"><strong>Formations (Données brutes) :</strong> ${JSON.stringify(agentTest.formations)}</p>
+                    <p style="color: white;"><strong>Divisions (Données brutes) :</strong> ${JSON.stringify(agentTest.division)}</p>
+                </div>
+            `;
+            
+            container.innerHTML = debugHtml;
+
+            // On affiche tous les agents normalement en dessous
             allAgents = agents;
             renderAgents(allAgents);
         }
 
         function renderAgents(agentsToRender) {
             const container = document.getElementById('agentsList');
-            container.innerHTML = '';
-
-            if (agentsToRender.length === 0) {
-                container.innerHTML = `<p style="color: var(--text-muted); text-align: center; grid-column: 1 / -1; padding: 40px;">Aucun agent ne correspond à votre recherche.</p>`;
-                return;
-            }
 
             agentsToRender.forEach(agent => {
-                // 1. Badge SUP
-                const supBadge = agent.est_superviseur 
-                    ? ' <span class="agent-badge" style="background:var(--gold); color:var(--bg-dark); font-weight:bold; margin-left:5px;">SUP</span>' 
-                    : '';
+                const supBadge = agent.est_superviseur ? ' <span class="agent-badge" style="background:var(--gold); color:var(--bg-dark); font-weight:bold; margin-left:5px;">SUP</span>' : '';
 
-                // 2. Formations
                 const formationsHtml = agent.formations && agent.formations.length > 0 
                     ? agent.formations.map(f => `<span class="tag">${f}</span>`).join('') 
-                    : '<span style="font-size:0.8rem; color:var(--text-muted);">Aucune formation validée</span>';
+                    : '<span style="font-size:0.8rem; color:var(--text-muted);">Aucune</span>';
 
-                // 3. Sanctions
-                const sanctionsHtml = agent.sanctions && agent.sanctions.length > 0
-                    ? agent.sanctions.map(s => `<span class="agent-badge sanction">${s}</span>`).join('')
-                    : '';
+                // Vérification stricte des sanctions
+                let sanctionsHtml = '';
+                if (agent.sanctions) {
+                    if (Array.isArray(agent.sanctions) && agent.sanctions.length > 0) {
+                        sanctionsHtml = agent.sanctions.map(s => `<span class="agent-badge sanction">${s}</span>`).join('');
+                    } else if (typeof agent.sanctions === 'string' && agent.sanctions.length > 0) {
+                        // Si c'est enregistré comme du texte au lieu d'un tableau
+                        sanctionsHtml = `<span class="agent-badge sanction">${agent.sanctions}</span>`;
+                    }
+                }
 
-                // 4. Divisions
                 let divisionsHtml = '<span class="agent-badge">Aucune division</span>';
                 if (agent.division) {
                     if (Array.isArray(agent.division)) {
@@ -152,7 +169,6 @@
                     }
                 }
 
-                // 5. Création de la carte
                 const card = document.createElement('div');
                 card.className = 'agent-card';
                 
@@ -169,15 +185,14 @@
                         ${divisionsHtml}
                     </div>
 
-                    <!-- SANCTIONS (Alerte rouge) -->
+                    <!-- SANCTIONS -->
                     ${sanctionsHtml ? `
-                    <div style="background: rgba(239, 68, 68, 0.1); border-left: 4px solid #ef4444; padding: 10px 15px; margin-bottom: 20px; border-radius: 4px;">
+                    <div style="background: rgba(239, 68, 68, 0.2); border-left: 4px solid #ef4444; padding: 10px 15px; margin-bottom: 15px; border-radius: 4px;">
                         <div style="font-size: 0.75rem; color: #ef4444; text-transform: uppercase; font-weight: bold; margin-bottom: 5px;">⚠️ Sanctions en cours</div>
                         <div class="agent-info-row">${sanctionsHtml}</div>
                     </div>` : ''}
 
-                    <!-- FORMATIONS -->
-                    <div style="margin-top: auto; border-top: 1px solid var(--border); padding-top: 15px;">
+                    <div style="margin-top: 15px;">
                         <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Formations Validées</div>
                         <div class="tags-container">${formationsHtml}</div>
                     </div>
@@ -186,23 +201,6 @@
             });
         }
 
-        // Barre de recherche
-        document.getElementById('searchAgent').addEventListener('input', (e) => {
-            const term = e.target.value.toLowerCase();
-            const filtered = allAgents.filter(a => {
-                const matchNom = a.nom.toLowerCase().includes(term);
-                const matchMatricule = a.matricule && a.matricule.includes(term);
-                const matchDiv = a.division && (
-                    Array.isArray(a.division) 
-                        ? a.division.some(d => d.toLowerCase().includes(term)) 
-                        : a.division.toLowerCase().includes(term)
-                );
-                return matchNom || matchMatricule || matchDiv;
-            });
-            renderAgents(filtered);
-        });
-
-        // Lancer le chargement
         fetchAgents();
     </script>
 </body>
