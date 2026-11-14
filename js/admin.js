@@ -1,5 +1,8 @@
 import { supabase } from './supabase.js';
 
+// ==========================================
+// 1. SÉCURITÉ & INITIALISATION
+// ==========================================
 document.body.style.visibility = 'hidden';
 document.body.style.opacity = '0';
 
@@ -32,11 +35,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     loadPages();
     loadAgents();
 
+    // Déconnexion
     document.getElementById('logoutBtn').addEventListener('click', async () => {
         await supabase.auth.signOut();
         window.location.replace('login.html');
     });
 
+    // Onglets
     document.querySelectorAll('.admin-tab-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
@@ -46,15 +51,83 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
 
+    // Recherche pages
     document.getElementById('searchInput').addEventListener('input', (e) => {
         const term = e.target.value.toLowerCase();
         const filtered = allPages.filter(p => p.title.toLowerCase().includes(term) || p.slug.toLowerCase().includes(term));
         renderPagesTable(filtered);
     });
+
+    // ==========================================
+    // GESTION DES AGENTS
+    // ==========================================
+    document.getElementById('btnCreateAgent').addEventListener('click', () => {
+        document.getElementById('agentForm').reset();
+        document.getElementById('agentId').value = '';
+        document.getElementById('agentSup').checked = false;
+        
+        // Décocher toutes les divisions et spécialisations
+        document.querySelectorAll('.agent-div-checkbox').forEach(cb => cb.checked = false);
+        document.querySelectorAll('.agent-spec-checkbox').forEach(cb => cb.checked = false);
+
+        currentFormations = [];
+        currentSanctions = [];
+        renderTags();
+        
+        document.getElementById('agentModalTitle').textContent = "Ajouter un Agent";
+        document.getElementById('agentModal').classList.add('active');
+    });
+
+    document.getElementById('btnCloseAgentModal').addEventListener('click', () => document.getElementById('agentModal').classList.remove('active'));
+    document.getElementById('btnCancelAgentModal').addEventListener('click', () => document.getElementById('agentModal').classList.remove('active'));
+
+    document.getElementById('agentForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const id = document.getElementById('agentId').value;
+        const btn = document.getElementById('submitAgentBtn');
+        
+        // Récupérer les cases cochées
+        const selectedDivisions = Array.from(document.querySelectorAll('.agent-div-checkbox:checked')).map(cb => cb.value);
+        const selectedSpecs = Array.from(document.querySelectorAll('.agent-spec-checkbox:checked')).map(cb => cb.value);
+
+        const agentData = {
+            nom: document.getElementById('agentNom').value,
+            matricule: document.getElementById('agentMatricule').value,
+            grade: document.getElementById('agentGrade').value,
+            division: selectedDivisions,
+            specialisations: selectedSpecs,
+            est_superviseur: document.getElementById('agentSup').checked,
+            formations: currentFormations,
+            sanctions: currentSanctions
+        };
+
+        btn.textContent = "Enregistrement...";
+        btn.disabled = true;
+
+        let error;
+        if (id) {
+            const { error: err } = await supabase.from('agents').update(agentData).eq('id', id);
+            error = err;
+        } else {
+            const { error: err } = await supabase.from('agents').insert([agentData]);
+            error = err;
+        }
+
+        btn.textContent = "Enregistrer";
+        btn.disabled = false;
+
+        if (error) {
+            alert("Erreur Supabase : " + error.message);
+        } else {
+            document.getElementById('agentModal').classList.remove('active');
+            showToast("Agent enregistré !");
+            loadAgents();
+        }
+    });
 });
 
 // ==========================================
-// PAGES
+// 2. GESTION DES PAGES
 // ==========================================
 async function loadPages() {
     const { data: pages, error } = await supabase.from('pages').select('*').order('created_at', { ascending: false });
@@ -94,64 +167,8 @@ window.deletePage = async (id) => {
 };
 
 // ==========================================
-// AGENTS
+// 3. CHARGEMENT DU TABLEAU DES AGENTS
 // ==========================================
-document.getElementById('btnCreateAgent').addEventListener('click', () => {
-    document.getElementById('agentForm').reset();
-    document.getElementById('agentId').value = '';
-    document.getElementById('agentSup').checked = false;
-    document.querySelectorAll('.agent-div-checkbox').forEach(cb => cb.checked = false);
-    currentFormations = [];
-    currentSanctions = [];
-    renderTags();
-    document.getElementById('agentModalTitle').textContent = "Ajouter un Agent";
-    document.getElementById('agentModal').classList.add('active');
-});
-
-document.getElementById('btnCloseAgentModal').addEventListener('click', () => document.getElementById('agentModal').classList.remove('active'));
-document.getElementById('btnCancelAgentModal').addEventListener('click', () => document.getElementById('agentModal').classList.remove('active'));
-
-document.getElementById('agentForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const id = document.getElementById('agentId').value;
-    const btn = document.getElementById('submitAgentBtn');
-    
-    const selectedDivisions = Array.from(document.querySelectorAll('.agent-div-checkbox:checked')).map(cb => cb.value);
-
-    const agentData = {
-        nom: document.getElementById('agentNom').value,
-        matricule: document.getElementById('agentMatricule').value,
-        grade: document.getElementById('agentGrade').value,
-        division: selectedDivisions,
-        est_superviseur: document.getElementById('agentSup').checked,
-        formations: currentFormations,
-        sanctions: currentSanctions
-    };
-
-    btn.textContent = "Enregistrement...";
-    btn.disabled = true;
-
-    let error;
-    if (id) {
-        const { error: err } = await supabase.from('agents').update(agentData).eq('id', id);
-        error = err;
-    } else {
-        const { error: err } = await supabase.from('agents').insert([agentData]);
-        error = err;
-    }
-
-    btn.textContent = "Enregistrer";
-    btn.disabled = false;
-
-    if (error) {
-        alert("Erreur : " + error.message);
-    } else {
-        document.getElementById('agentModal').classList.remove('active');
-        showToast("Agent enregistré !");
-        loadAgents();
-    }
-});
-
 async function loadAgents() {
     const tbody = document.getElementById('agentsTableBody');
     const { data: agents, error } = await supabase.from('agents').select('*').order('nom', { ascending: true });
@@ -166,6 +183,7 @@ async function loadAgents() {
         const tr = document.createElement('tr');
         const supBadge = agent.est_superviseur ? ' <span class="agent-badge" style="background:var(--gold); color:var(--bg-dark); font-weight:bold; margin-left:5px; font-size:0.7rem;">SUP</span>' : '';
         
+        // Formatage des divisions
         let divisionsDisplay = '-';
         if (agent.division) {
             if (Array.isArray(agent.division)) {
@@ -175,6 +193,7 @@ async function loadAgents() {
             }
         }
 
+        // Formatage des sanctions (badge rouge dans le tableau admin)
         let sanctionsDisplay = '-';
         if (agent.sanctions && agent.sanctions.length > 0) {
             sanctionsDisplay = agent.sanctions.map(s => `<span class="agent-badge sanction" style="font-size:0.7rem; margin-bottom:2px;">${s}</span>`).join(' ');
@@ -194,6 +213,9 @@ async function loadAgents() {
     });
 }
 
+// ==========================================
+// 4. ÉDITION D'UN AGENT
+// ==========================================
 window.editAgent = async (id) => {
     const { data: agent } = await supabase.from('agents').select('*').eq('id', id).single();
     if (!agent) return;
@@ -204,9 +226,16 @@ window.editAgent = async (id) => {
     document.getElementById('agentGrade').value = agent.grade || '';
     document.getElementById('agentSup').checked = agent.est_superviseur || false;
     
+    // Cocher les divisions
     const agentDivisions = Array.isArray(agent.division) ? agent.division : [agent.division];
     document.querySelectorAll('.agent-div-checkbox').forEach(cb => {
         cb.checked = agentDivisions.includes(cb.value);
+    });
+
+    // Cocher les spécialisations
+    const agentSpecs = Array.isArray(agent.specialisations) ? agent.specialisations : [];
+    document.querySelectorAll('.agent-spec-checkbox').forEach(cb => {
+        cb.checked = agentSpecs.includes(cb.value);
     });
 
     currentFormations = agent.formations || [];
@@ -224,6 +253,9 @@ window.deleteAgent = async (id) => {
     }
 };
 
+// ==========================================
+// 5. OUTILS (Tags & Toast)
+// ==========================================
 function showToast(message) {
     const toast = document.getElementById('toast');
     document.getElementById('toastMessage').textContent = message;
