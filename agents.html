@@ -1,133 +1,3 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <title>Registre des Agents — SASP</title>
-    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="icon" type="image/png" href="img/badge-sasp.png">
-    <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
-
-    <!-- NAVIGATION -->
-    <header class="navbar scrolled">
-        <div class="nav-container">
-            <a href="index.html" class="nav-brand">
-                <img src="img/badge-sasp.png" alt="SASP Logo" class="nav-logo-img">
-                <div class="nav-brand-text">
-                    <span class="brand-title">SASP</span>
-                    <span class="brand-sub">San Andreas State Police</span>
-                </div>
-            </a>
-            <nav class="nav-links">
-                <a href="index.html" class="nav-link">Accueil</a>
-                <a href="agents.html" class="nav-link active">Registre des Agents</a>
-                <a href="login.html" class="nav-link" style="color: var(--gold);">Accès Staff</a>
-            </nav>
-        </div>
-    </header>
-
-    <!-- HERO INTERNE -->
-    <section class="hero-inner">
-        <div class="hero-watermark" style="right: 0; left: auto; opacity: 0.02;">
-            <img src="img/badge-sasp.png" alt="">
-        </div>
-        <div class="hero-inner-content">
-            <div class="hero-tag"><span class="tag-line"></span> Effectif Officiel</div>
-            <h1 class="hero-title">Registre des Agents</h1>
-            <p class="hero-subtitle">Liste des membres actifs du San Andreas State Police, leurs divisions, leurs formations validées et leurs sanctions en cours.</p>
-        </div>
-    </section>
-
-    <!-- CONTENU -->
-    <main class="main-content">
-        
-        <!-- Barre de recherche -->
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 15px;">
-            <h2 style="font-family: var(--font-heading); font-size: 1.8rem; color: var(--text-main);">Nos effectifs</h2>
-            <input type="text" id="searchAgent" placeholder="Rechercher un agent (Nom, Matricule, Division)..." style="padding: 12px; background: var(--surface); border: 1px solid var(--border); color: var(--text-main); border-radius: 4px; width: 350px; max-width: 100%;">
-        </div>
-
-        <!-- Grille des agents -->
-        <div class="agents-grid" id="agentsList">
-            <p style="color: var(--text-muted);">Chargement du registre...</p>
-        </div>
-
-    </main>
-
-    <!-- FOOTER -->
-    <footer class="footer">
-        <div class="footer-container">
-            <div class="footer-bottom">
-                <p class="footer-copy">© 2026 San Andreas State Police — Livret officiel de l'agent.</p>
-                <p class="footer-devise">« To Protect and To Serve »</p>
-            </div>
-        </div>
-    </footer>
-
-    <!-- SCRIPT -->
-    <script type="module">
-        import { supabase } from './js/supabase.js';
-
-        let allAgents = [];
-
-        // 1. Charger les agents depuis Supabase
-        async function fetchAgents() {
-            const container = document.getElementById('agentsList');
-            
-            const { data: agents, error } = await supabase
-                .from('agents')
-                .select('*')
-                .order('nom', { ascending: true });
-
-            if (error || !agents || agents.length === 0) {
-                container.innerHTML = `<p style="color: var(--text-muted); text-align: center; grid-column: 1 / -1; padding: 40px;">Aucun agent enregistré dans le registre pour le moment.</p>`;
-                return;
-            }
-
-            allAgents = agents;
-            renderAgents(allAgents);
-        }
-
-        // 2. Afficher les agents sous forme de cartes
-        function renderAgents(agentsToRender) {
-            const container = document.getElementById('agentsList');
-            container.innerHTML = '';
-
-            if (agentsToRender.length === 0) {
-                container.innerHTML = `<p style="color: var(--text-muted); text-align: center; grid-column: 1 / -1; padding: 40px;">Aucun agent ne correspond à votre recherche.</p>`;
-                return;
-            }
-
-            agentsToRender.forEach(agent => {
-                // Badge SUP
-                const supBadge = agent.est_superviseur 
-                    ? ' <span class="agent-badge" style="background:var(--gold); color:var(--bg-dark); font-weight:bold; margin-left:5px;">SUP</span>' 
-                    : '';
-
-                // Formations (Étiquettes)
-                const formationsHtml = agent.formations && agent.formations.length > 0 
-                    ? agent.formations.map(f => `<span class="tag">${f}</span>`).join('') 
-                    : '<span style="font-size:0.8rem; color:var(--text-muted);">Aucune formation</span>';
-
-                // Sanctions (Badges rouges)
-                const sanctionsHtml = agent.sanctions && agent.sanctions.length > 0
-                    ? agent.sanctions.map(s => `<span class="agent-badge sanction">${s}</span>`).join('')
-                    : '';
-
-                // Gestion des divisions multiples
-                let divisionsHtml = '<span class="agent-badge">Aucune division</span>';
-                if (agent.division) {
-                    if (Array.isArray(agent.division)) {
-                        divisionsHtml = agent.division.map(d => `<span class="agent-badge">${d}</span>`).join(' ');
-                    } else {
-                        divisionsHtml = `<span class="agent-badge">${agent.division}</span>`;
-                    }
-                }
-
-                const card = document.createElement('div');
-                card.className = 'agent-card';
-                
                 card.innerHTML = `
                     <div class="agent-header">
                         <div>
@@ -141,39 +11,15 @@
                         ${divisionsHtml}
                     </div>
 
+                    <!-- SANCTIONS BIEN VISIBLES -->
+                    ${sanctionsHtml ? `
+                    <div style="background: rgba(239, 68, 68, 0.1); border-left: 4px solid #ef4444; padding: 10px 15px; margin-bottom: 15px; border-radius: 4px;">
+                        <div style="font-size: 0.75rem; color: #ef4444; text-transform: uppercase; font-weight: bold; margin-bottom: 5px;">⚠️ Sanctions en cours</div>
+                        <div class="agent-info-row">${sanctionsHtml}</div>
+                    </div>` : ''}
+
                     <div style="margin-top: 15px;">
                         <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Formations Validées</div>
                         <div class="tags-container">${formationsHtml}</div>
                     </div>
-
-                    ${sanctionsHtml ? `
-                    <div style="margin-top: 15px; border-top: 1px dashed var(--border); padding-top: 15px;">
-                        <div style="font-size: 0.75rem; color: var(--error); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Sanctions en cours</div>
-                        <div class="agent-info-row">${sanctionsHtml}</div>
-                    </div>` : ''}
                 `;
-                container.appendChild(card);
-            });
-        }
-
-        // 3. Barre de recherche
-        document.getElementById('searchAgent').addEventListener('input', (e) => {
-            const term = e.target.value.toLowerCase();
-            const filtered = allAgents.filter(a => {
-                const matchNom = a.nom.toLowerCase().includes(term);
-                const matchMatricule = a.matricule && a.matricule.includes(term);
-                const matchDiv = a.division && (
-                    Array.isArray(a.division) 
-                        ? a.division.some(d => d.toLowerCase().includes(term)) 
-                        : a.division.toLowerCase().includes(term)
-                );
-                return matchNom || matchMatricule || matchDiv;
-            });
-            renderAgents(filtered);
-        });
-
-        // Lancer le chargement
-        fetchAgents();
-    </script>
-</body>
-</html>
