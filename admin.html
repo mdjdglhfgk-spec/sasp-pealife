@@ -1,131 +1,3 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <title>SASP — Centre de Commandement</title>
-    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="icon" type="image/png" href="img/badge-sasp.png">
-    <link rel="stylesheet" href="css/style.css">
-</head>
-<body class="admin-body">
-
-    <!-- ÉCRAN DE CHARGEMENT -->
-    <div id="loadingScreen" class="loading-screen">
-        <div class="spinner"></div>
-        <h2>Vérification des accès...</h2>
-    </div>
-
-    <!-- DASHBOARD -->
-    <div class="admin-dashboard" id="adminDashboard" style="display: none;">
-        
-        <!-- SIDEBAR -->
-        <aside class="admin-sidebar">
-            <div class="admin-brand">
-                <img src="img/badge-sasp.png" alt="SASP">
-                <div>
-                    <h1>Command Center</h1>
-                    <span>SASP Intranet</span>
-                </div>
-            </div>
-            <nav class="admin-nav">
-                <a href="#" class="active">Gestion du contenu</a>
-                <a href="index.html" target="_blank">Voir le site public</a>
-                <a href="agents.html" target="_blank">Voir le registre</a>
-            </nav>
-            <button id="logoutBtn" class="btn btn-outline" style="margin-top: auto;">Déconnexion</button>
-        </aside>
-
-        <!-- MAIN CONTENT -->
-        <main class="admin-main">
-            <div class="admin-topbar">
-                <h2>Gestion de la faction</h2>
-                <div class="admin-user">
-                    <span class="status-dot"></span> Administrateur connecté
-                </div>
-            </div>
-
-            <!-- SYSTEME D'ONGLETS -->
-            <div class="admin-tabs">
-                <button class="admin-tab-btn active" data-target="tab-pages">📄 Pages du site</button>
-                <button class="admin-tab-btn" data-target="tab-agents">👮 Registre des Agents</button>
-            </div>
-
-            <!-- ================= ONGLET PAGES ================= -->
-            <div id="tab-pages" class="admin-tab-content active">
-                <div class="admin-panel">
-                    <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                        <div>
-                            <h3>Gestion des pages</h3>
-                            <p>Cliquez sur "Modifier" pour éditer une page.</p>
-                        </div>
-                        <!-- Le bouton pour créer une page redirige aussi vers editer.html -->
-                        <a href="editer.html" class="btn btn-primary" style="padding: 10px 20px; text-decoration: none;">+ Nouvelle Page</a>
-                    </div>
-
-                    <div class="admin-search-bar">
-                        <input type="text" id="searchInput" placeholder="Rechercher une page par titre...">
-                    </div>
-                    
-                    <div class="table-responsive">
-                        <table class="admin-table">
-                            <thead>
-                                <tr>
-                                    <th>Titre de la page</th>
-                                    <th>URL (Slug)</th>
-                                    <th style="text-align: right;">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="pagesTableBody">
-                                <tr><td colspan="3" style="text-align: center;">Chargement...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ================= ONGLET AGENTS ================= -->
-            <div id="tab-agents" class="admin-tab-content">
-                <div class="admin-panel">
-                    <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                        <div>
-                            <h3>Registre des Agents</h3>
-                            <p>Gérez les effectifs, grades, divisions et formations.</p>
-                        </div>
-                        <button class="btn btn-primary" id="btnCreateAgent" style="padding: 10px 20px;">+ Nouvel Agent</button>
-                    </div>
-                    
-                    <div class="table-responsive">
-                        <table class="admin-table">
-                            <thead>
-                                <tr>
-                                    <th>Nom Prénom</th>
-                                    <th>Grade</th>
-                                    <th>Division</th>
-                                    <th style="text-align: right;">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="agentsTableBody">
-                                <tr><td colspan="4" style="text-align: center;">Chargement...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-        </main>
-    </div>
-
-    <!-- ========================================== -->
-    <!-- MODALE UNIQUE POUR LES AGENTS              -->
-    <!-- ========================================== -->
-    <div class="modal-overlay" id="agentModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="agentModalTitle">Ajouter un Agent</h3>
-                <button class="modal-close" id="btnCloseAgentModal">&times;</button>
-            </div>
-            
-            <div class="modal-body">
                 <form id="agentForm">
                     <input type="hidden" id="agentId">
                     
@@ -140,38 +12,37 @@
                         </div>
                     </div>
 
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                        <div class="form-group">
-                            <label>Grade</label>
-                            <select id="agentGrade">
-                                <option value="">Sélectionner un grade...</option>
-                                <option value="Cadet">Cadet</option>
-                                <option value="Officer">Officer</option>
-                                <option value="Officer II">Officer II</option>
-                                <option value="Officer III">Officer III</option>
-                                <option value="Sergeant">Sergeant</option>
-                                <option value="Lieutenant">Lieutenant</option>
-                                <option value="Captain">Captain</option>
-                                <option value="Commander">Commander</option>
-                                <option value="Chief">Chief</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Division Principale</label>
-                            <select id="agentDivision">
-                                <option value="">Sélectionner une division...</option>
-                                <option value="METRO">METRO</option>
-                                <option value="HIGHWAY">HIGHWAY</option>
-                                <option value="K9">K9</option>
-                                <option value="MCD">MCD</option>
-                                <option value="FTO">FTO</option>
-                                <option value="PA">PA</option>
-                            </select>
+                    <div class="form-group">
+                        <label>Grade</label>
+                        <select id="agentGrade">
+                            <option value="">Sélectionner un grade...</option>
+                            <option value="Cadet">Cadet</option>
+                            <option value="Officer">Officer</option>
+                            <option value="Officer II">Officer II</option>
+                            <option value="Officer III">Officer III</option>
+                            <option value="Sergeant">Sergeant</option>
+                            <option value="Lieutenant">Lieutenant</option>
+                            <option value="Captain">Captain</option>
+                            <option value="Commander">Commander</option>
+                            <option value="Chief">Chief</option>
+                        </select>
+                    </div>
+
+                    <!-- DIVISIONS MULTIPLES (Pastilles) -->
+                    <div class="form-group">
+                        <label>Divisions (Sélection multiple)</label>
+                        <div class="division-pill-group">
+                            <label class="division-pill"><input type="checkbox" value="METRO" class="agent-div-checkbox"> METRO</label>
+                            <label class="division-pill"><input type="checkbox" value="HIGHWAY" class="agent-div-checkbox"> HIGHWAY</label>
+                            <label class="division-pill"><input type="checkbox" value="K9" class="agent-div-checkbox"> K9</label>
+                            <label class="division-pill"><input type="checkbox" value="MCD" class="agent-div-checkbox"> MCD</label>
+                            <label class="division-pill"><input type="checkbox" value="FTO" class="agent-div-checkbox"> FTO</label>
+                            <label class="division-pill"><input type="checkbox" value="PA" class="agent-div-checkbox"> PA</label>
                         </div>
                     </div>
 
                     <!-- SUPERVISEUR -->
-                    <div class="form-group" style="display: flex; align-items: center; gap: 10px; background: rgba(212, 175, 55, 0.1); padding: 15px; border-radius: 6px; border: 1px solid var(--gold);">
+                    <div class="form-group" style="display: flex; align-items: center; gap: 10px; background: rgba(212, 175, 55, 0.1); padding: 15px; border-radius: 6px; border: 1px solid var(--gold); margin-top: 20px;">
                         <input type="checkbox" id="agentSup" style="width: 20px; height: 20px; cursor: pointer; accent-color: var(--gold);">
                         <label for="agentSup" style="margin: 0; cursor: pointer; color: var(--gold); font-weight: bold;">Supervisor de Terrain (SUP)</label>
                     </div>
@@ -210,21 +81,3 @@
                         <div class="active-tags" id="listSanctions"></div>
                     </div>
                 </form>
-            </div>
-            
-            <div class="modal-footer">
-                <button class="btn btn-outline" id="btnCancelAgentModal">Annuler</button>
-                <button class="btn btn-primary" id="submitAgentBtn" form="agentForm" type="submit">Enregistrer</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- NOTIFICATION TOAST -->
-    <div class="toast-notification" id="toast">
-        <span id="toastMessage">Opération réussie !</span>
-    </div>
-
-    <!-- SCRIPT -->
-    <script type="module" src="js/admin.js"></script>
-</body>
-</html>
