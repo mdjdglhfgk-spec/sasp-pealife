@@ -28,6 +28,24 @@ async function checkAuth() {
     }
 }
 
+// ==========================================
+// 2. GESTIONNAIRE DE LA MODALE (SCROLL)
+// ==========================================
+const modal = document.getElementById('agentModal');
+
+function openModal() {
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden'; // Bloque le scroll du fond
+}
+
+function closeModal() {
+    modal.classList.remove('active');
+    document.body.style.overflow = ''; // Réactive le scroll du fond
+}
+
+// ==========================================
+// 3. INITIALISATION GLOBALE
+// ==========================================
 document.addEventListener('DOMContentLoaded', async () => {
     const isAuth = await checkAuth();
     if (!isAuth) return; 
@@ -59,14 +77,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     // ==========================================
-    // GESTION DES AGENTS
+    // ÉVÉNEMENTS DES AGENTS
     // ==========================================
     document.getElementById('btnCreateAgent').addEventListener('click', () => {
         document.getElementById('agentForm').reset();
         document.getElementById('agentId').value = '';
         document.getElementById('agentSup').checked = false;
         
-        // Décocher toutes les divisions et spécialisations
         document.querySelectorAll('.agent-div-checkbox').forEach(cb => cb.checked = false);
         document.querySelectorAll('.agent-spec-checkbox').forEach(cb => cb.checked = false);
 
@@ -75,18 +92,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         renderTags();
         
         document.getElementById('agentModalTitle').textContent = "Ajouter un Agent";
-        document.getElementById('agentModal').classList.add('active');
+        openModal();
     });
 
-    document.getElementById('btnCloseAgentModal').addEventListener('click', () => document.getElementById('agentModal').classList.remove('active'));
-    document.getElementById('btnCancelAgentModal').addEventListener('click', () => document.getElementById('agentModal').classList.remove('active'));
+    // Fermeture de la modale (boutons X, Annuler et clic extérieur)
+    document.getElementById('btnCloseAgentModal').addEventListener('click', closeModal);
+    document.getElementById('btnCancelAgentModal').addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
 
+    // Soumission du formulaire Agent
     document.getElementById('agentForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const id = document.getElementById('agentId').value;
         const btn = document.getElementById('submitAgentBtn');
         
-        // Récupérer les cases cochées
         const selectedDivisions = Array.from(document.querySelectorAll('.agent-div-checkbox:checked')).map(cb => cb.value);
         const selectedSpecs = Array.from(document.querySelectorAll('.agent-spec-checkbox:checked')).map(cb => cb.value);
 
@@ -119,7 +140,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (error) {
             alert("Erreur Supabase : " + error.message);
         } else {
-            document.getElementById('agentModal').classList.remove('active');
+            closeModal();
             showToast("Agent enregistré !");
             loadAgents();
         }
@@ -127,7 +148,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 // ==========================================
-// 2. GESTION DES PAGES
+// 4. GESTION DES PAGES
 // ==========================================
 async function loadPages() {
     const { data: pages, error } = await supabase.from('pages').select('*').order('created_at', { ascending: false });
@@ -167,7 +188,7 @@ window.deletePage = async (id) => {
 };
 
 // ==========================================
-// 3. CHARGEMENT DU TABLEAU DES AGENTS
+// 5. CHARGEMENT DU TABLEAU DES AGENTS
 // ==========================================
 async function loadAgents() {
     const tbody = document.getElementById('agentsTableBody');
@@ -183,7 +204,6 @@ async function loadAgents() {
         const tr = document.createElement('tr');
         const supBadge = agent.est_superviseur ? ' <span class="agent-badge" style="background:var(--gold); color:var(--bg-dark); font-weight:bold; margin-left:5px; font-size:0.7rem;">SUP</span>' : '';
         
-        // Formatage des divisions
         let divisionsDisplay = '-';
         if (agent.division) {
             if (Array.isArray(agent.division)) {
@@ -193,7 +213,6 @@ async function loadAgents() {
             }
         }
 
-        // Formatage des sanctions (badge rouge dans le tableau admin)
         let sanctionsDisplay = '-';
         if (agent.sanctions && agent.sanctions.length > 0) {
             sanctionsDisplay = agent.sanctions.map(s => `<span class="agent-badge sanction" style="font-size:0.7rem; margin-bottom:2px;">${s}</span>`).join(' ');
@@ -214,7 +233,7 @@ async function loadAgents() {
 }
 
 // ==========================================
-// 4. ÉDITION D'UN AGENT
+// 6. ÉDITION D'UN AGENT
 // ==========================================
 window.editAgent = async (id) => {
     const { data: agent } = await supabase.from('agents').select('*').eq('id', id).single();
@@ -226,13 +245,11 @@ window.editAgent = async (id) => {
     document.getElementById('agentGrade').value = agent.grade || '';
     document.getElementById('agentSup').checked = agent.est_superviseur || false;
     
-    // Cocher les divisions
     const agentDivisions = Array.isArray(agent.division) ? agent.division : [agent.division];
     document.querySelectorAll('.agent-div-checkbox').forEach(cb => {
         cb.checked = agentDivisions.includes(cb.value);
     });
 
-    // Cocher les spécialisations
     const agentSpecs = Array.isArray(agent.specialisations) ? agent.specialisations : [];
     document.querySelectorAll('.agent-spec-checkbox').forEach(cb => {
         cb.checked = agentSpecs.includes(cb.value);
@@ -243,7 +260,7 @@ window.editAgent = async (id) => {
     renderTags();
     
     document.getElementById('agentModalTitle').textContent = "Modifier l'Agent";
-    document.getElementById('agentModal').classList.add('active');
+    openModal();
 };
 
 window.deleteAgent = async (id) => {
@@ -254,7 +271,7 @@ window.deleteAgent = async (id) => {
 };
 
 // ==========================================
-// 5. OUTILS (Tags & Toast)
+// 7. OUTILS (Tags & Toast)
 // ==========================================
 function showToast(message) {
     const toast = document.getElementById('toast');
