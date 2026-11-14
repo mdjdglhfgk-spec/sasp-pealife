@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Éditer — SASP</title>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="img/badge-sasp.png">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="admin-body" style="padding: 40px; display: block; overflow-y: auto;">
+
+    <div class="admin-panel" style="max-width: 1000px; margin: 0 auto;">
+        <div class="panel-header" style="margin-bottom: 20px;">
+            <h3>Édition de la page</h3>
+            <p>Modifiez le contenu ci-dessous et cliquez sur Enregistrer.</p>
+        </div>
+
+        <form id="editPageForm">
+            <input type="hidden" id="editId">
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                <div class="form-group">
+                    <label>Titre de la page</label>
+                    <input type="text" id="editTitle" required>
+                </div>
+                <div class="form-group">
+                    <label>Slug (URL)</label>
+                    <input type="text" id="editSlug" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Contenu (HTML accepté)</label>
+                <textarea id="editContent" style="width: 100%; height: 400px; padding: 15px; background: var(--bg-dark); color: var(--text-main); border: 1px solid var(--border); font-family: monospace; font-size: 1rem;"></textarea>
+            </div>
+
+            <div style="display: flex; gap: 15px; justify-content: flex-end; margin-top: 20px;">
+                <a href="admin.html" class="btn btn-outline">Retour</a>
+                <button type="submit" class="btn btn-primary" id="saveBtn">Enregistrer les modifications</button>
+            </div>
+        </form>
+    </div>
+
+    <script type="module">
+        import { supabase } from './js/supabase.js';
+
+        // Récupérer l'ID dans l'URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const pageId = urlParams.get('id');
+
+        if (!pageId) {
+            alert("Aucune page sélectionnée.");
+            window.location.href = 'admin.html';
+        }
+
+        // Charger les données de la page
+        async function loadPageData() {
+            const { data: page, error } = await supabase.from('pages').select('*').eq('id', pageId).single();
+            if (error || !page) {
+                alert("Erreur de chargement de la page.");
+                window.location.href = 'admin.html';
+                return;
+            }
+
+            document.getElementById('editId').value = page.id;
+            document.getElementById('editTitle').value = page.title;
+            document.getElementById('editSlug').value = page.slug;
+            document.getElementById('editContent').value = page.content;
+        }
+
+        loadPageData();
+
+        // Enregistrer
+        document.getElementById('editPageForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('saveBtn');
+            btn.textContent = "Enregistrement...";
+            btn.disabled = true;
+
+            const updateData = {
+                title: document.getElementById('editTitle').value,
+                slug: document.getElementById('editSlug').value,
+                content: document.getElementById('editContent').value
+            };
+
+            const { error } = await supabase.from('pages').update(updateData).eq('id', pageId);
+
+            if (error) {
+                alert("Erreur : " + error.message);
+                btn.textContent = "Enregistrer";
+                btn.disabled = false;
+            } else {
+                alert("Page enregistrée avec succès !");
+                window.location.href = 'admin.html';
+            }
+        });
+    </script>
+</body>
+</html>
