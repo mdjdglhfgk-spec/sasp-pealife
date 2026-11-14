@@ -1,239 +1,103 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <title>SASP — Centre de Commandement</title>
-    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="icon" type="image/png" href="img/badge-sasp.png">
-    <link rel="stylesheet" href="css/style.css">
-</head>
-<body class="admin-body">
-
-    <!-- ÉCRAN DE CHARGEMENT -->
-    <div id="loadingScreen" class="loading-screen">
-        <div class="spinner"></div>
-        <h2>Vérification des accès...</h2>
-    </div>
-
-    <!-- DASHBOARD -->
-    <div class="admin-dashboard" id="adminDashboard" style="display: none;">
+<!-- ========================================== -->
+<!-- MODALE 2 : GESTION DES AGENTS              -->
+<!-- ========================================== -->
+<div class="modal-overlay" id="agentModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="agentModalTitle">Ajouter un Agent</h3>
+            <button class="modal-close" id="btnCloseAgentModal">&times;</button>
+        </div>
         
-        <!-- SIDEBAR -->
-        <aside class="admin-sidebar">
-            <div class="admin-brand">
-                <img src="img/badge-sasp.png" alt="SASP">
-                <div>
-                    <h1>Command Center</h1>
-                    <span>SASP Intranet</span>
-                </div>
-            </div>
-            <nav class="admin-nav">
-                <a href="#" class="active">Gestion du contenu</a>
-                <a href="index.html" target="_blank">Voir le site public</a>
-                <a href="agents.html" target="_blank">Voir le registre</a>
-            </nav>
-            <button id="logoutBtn" class="btn btn-outline" style="margin-top: auto;">Déconnexion</button>
-        </aside>
-
-        <!-- MAIN CONTENT -->
-        <main class="admin-main">
-            <div class="admin-topbar">
-                <h2>Gestion de la faction</h2>
-                <div class="admin-user">
-                    <span class="status-dot"></span> Administrateur connecté
-                </div>
-            </div>
-
-            <!-- SYSTEME D'ONGLETS -->
-            <div class="admin-tabs">
-                <button class="admin-tab-btn active" data-target="tab-pages">📄 Pages du site</button>
-                <button class="admin-tab-btn" data-target="tab-agents">👮 Registre des Agents</button>
-            </div>
-
-            <!-- ================= ONGLET PAGES ================= -->
-            <div id="tab-pages" class="admin-tab-content active">
-                <div class="admin-panel">
-                    <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                        <div>
-                            <h3>Gestion des pages</h3>
-                            <p>Modifiez le contenu textuel du site.</p>
-                        </div>
-                        <button class="btn btn-primary" id="btnCreateNew" style="padding: 10px 20px;">+ Nouvelle Page</button>
-                    </div>
-
-                    <div class="admin-search-bar">
-                        <input type="text" id="searchInput" placeholder="Rechercher une page...">
-                    </div>
-                    
-                    <div class="table-responsive">
-                        <table class="admin-table">
-                            <thead>
-                                <tr>
-                                    <th>Titre de la page</th>
-                                    <th>URL (Slug)</th>
-                                    <th style="text-align: right;">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="pagesTableBody">
-                                <tr><td colspan="3" style="text-align: center;">Chargement...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ================= ONGLET AGENTS ================= -->
-            <div id="tab-agents" class="admin-tab-content">
-                <div class="admin-panel">
-                    <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                        <div>
-                            <h3>Registre des Agents</h3>
-                            <p>Gérez les effectifs, grades, divisions et formations.</p>
-                        </div>
-                        <button class="btn btn-primary" id="btnCreateAgent" style="padding: 10px 20px;">+ Nouvel Agent</button>
-                    </div>
-                    
-                    <div class="table-responsive">
-                        <table class="admin-table">
-                            <thead>
-                                <tr>
-                                    <th>Nom Prénom</th>
-                                    <th>Grade</th>
-                                    <th>Division</th>
-                                    <th style="text-align: right;">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="agentsTableBody">
-                                <tr><td colspan="4" style="text-align: center;">Chargement...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-        </main>
-    </div>
-
-    <!-- ========================================== -->
-    <!-- MODALE 1 : ÉDITION DE PAGE                 -->
-    <!-- ========================================== -->
-    <div class="modal-overlay" id="editorModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="modalTitle">Modifier la page</h3>
-                <button class="modal-close" id="btnCloseModal">&times;</button>
-            </div>
-            
-            <div class="modal-body">
-                <form id="pageForm">
-                    <input type="hidden" id="pageId">
-                    
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                        <div class="form-group">
-                            <label>Titre de la page</label>
-                            <input type="text" id="pageTitle" required placeholder="Ex: Manuel du Rookie">
-                        </div>
-                        <div class="form-group">
-                            <label>Slug (URL)</label>
-                            <input type="text" id="pageSlug" required placeholder="Ex: rookie">
-                        </div>
-                    </div>
-                    
+        <div class="modal-body">
+            <form id="agentForm">
+                <input type="hidden" id="agentId">
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                     <div class="form-group">
-                        <label>Contenu de la page</label>
-                        <div class="editor-container">
-                            <div class="editor-toolbar">
-                                <button type="button" onclick="formatDoc('bold')" title="Gras"><b>G</b></button>
-                                <button type="button" onclick="formatDoc('italic')" title="Italique"><i>I</i></button>
-                                <button type="button" onclick="formatDoc('underline')" title="Souligné"><u>S</u></button>
-                                <button type="button" onclick="formatDoc('formatBlock', '<h3>')">Titre</button>
-                                <button type="button" onclick="formatDoc('formatBlock', '<p>')">Paragraphe</button>
-                                <button type="button" onclick="formatDoc('insertUnorderedList')">Liste</button>
-                            </div>
-                            <div id="editorContent" class="editor-content" contenteditable="true" data-placeholder="Écrivez votre contenu ici..."></div>
-                        </div>
+                        <label>Nom Prénom</label>
+                        <input type="text" id="agentNom" required placeholder="Ex: John Doe">
                     </div>
-                </form>
-            </div>
-            
-            <div class="modal-footer">
-                <button class="btn btn-outline" id="btnCancelModal">Annuler</button>
-                <button class="btn btn-primary" id="submitBtn" form="pageForm" type="submit">Enregistrer</button>
-            </div>
+                    <div class="form-group">
+                        <label>Matricule</label>
+                        <input type="text" id="agentMatricule" placeholder="Ex: 1024">
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="form-group">
+                        <label>Grade</label>
+                        <select id="agentGrade">
+                            <option value="">Sélectionner un grade...</option>
+                            <option value="Cadet">Cadet</option>
+                            <option value="Officer">Officer</option>
+                            <option value="Officer II">Officer II</option>
+                            <option value="Officer III">Officer III</option>
+                            <option value="Sergeant">Sergeant</option>
+                            <option value="Lieutenant">Lieutenant</option>
+                            <option value="Captain">Captain</option>
+                            <option value="Commander">Commander</option>
+                            <option value="Chief">Chief</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Division Principale</label>
+                        <select id="agentDivision">
+                            <option value="">Sélectionner une division...</option>
+                            <option value="METRO">METRO</option>
+                            <option value="HIGHWAY">HIGHWAY</option>
+                            <option value="K9">K9</option>
+                            <option value="MCD">MCD</option>
+                            <option value="FTO">FTO</option>
+                            <option value="PA">PA</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- SUPERVISEUR -->
+                <div class="form-group" style="display: flex; align-items: center; gap: 10px; background: rgba(212, 175, 55, 0.1); padding: 15px; border-radius: 6px; border: 1px solid var(--gold);">
+                    <input type="checkbox" id="agentSup" style="width: 20px; height: 20px; cursor: pointer;">
+                    <label for="agentSup" style="margin: 0; cursor: pointer; color: var(--gold); font-weight: bold;">Supervisor de Terrain (SUP)</label>
+                </div>
+
+                <!-- FORMATIONS -->
+                <div class="form-group">
+                    <label>Formations Validées</label>
+                    <div class="tags-input-group">
+                        <select id="selectFormation" style="flex: 1; padding: 8px; background: var(--bg-dark); border: 1px solid var(--border); color: var(--text-main); border-radius: 4px;">
+                            <option value="">Ajouter une formation...</option>
+                            <option value="PA">Formation PA (PA)</option>
+                            <option value="PPA">Formation PPA (PPA)</option>
+                            <option value="PPAL">Formation PPA LOURD (PPAL)</option>
+                            <option value="CDU">Formation conduite urgente (CDU)</option>
+                            <option value="F-T">Formation Tazer (F-T)</option>
+                            <option value="PROC">Formation Procédure (PROC)</option>
+                        </select>
+                        <button type="button" onclick="addTag('formation')">+</button>
+                    </div>
+                    <div class="active-tags" id="listFormations"></div>
+                </div>
+
+                <!-- SANCTIONS -->
+                <div class="form-group">
+                    <label>Sanctions</label>
+                    <div class="tags-input-group">
+                        <select id="selectSanction" style="flex: 1; padding: 8px; background: var(--bg-dark); border: 1px solid var(--border); color: var(--text-main); border-radius: 4px;">
+                            <option value="">Ajouter une sanction...</option>
+                            <option value="B1">Blâme 1 (B1)</option>
+                            <option value="B2">Blâme 2 (B2)</option>
+                            <option value="S">Suspendu (S)</option>
+                            <option value="RENV">En cour de renvoi (RENV)</option>
+                        </select>
+                        <button type="button" onclick="addTag('sanction')">+</button>
+                    </div>
+                    <div class="active-tags" id="listSanctions"></div>
+                </div>
+            </form>
+        </div>
+        
+        <div class="modal-footer">
+            <button class="btn btn-outline" id="btnCancelAgentModal">Annuler</button>
+            <button class="btn btn-primary" id="submitAgentBtn" form="agentForm" type="submit">Enregistrer</button>
         </div>
     </div>
-
-    <!-- ========================================== -->
-    <!-- MODALE 2 : GESTION DES AGENTS              -->
-    <!-- ========================================== -->
-    <div class="modal-overlay" id="agentModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="agentModalTitle">Ajouter un Agent</h3>
-                <button class="modal-close" id="btnCloseAgentModal">&times;</button>
-            </div>
-            
-            <div class="modal-body">
-                <form id="agentForm">
-                    <input type="hidden" id="agentId">
-                    
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                        <div class="form-group">
-                            <label>Nom Prénom</label>
-                            <input type="text" id="agentNom" required placeholder="Ex: John Doe">
-                        </div>
-                        <div class="form-group">
-                            <label>Matricule</label>
-                            <input type="text" id="agentMatricule" placeholder="Ex: 1024">
-                        </div>
-                    </div>
-
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                        <div class="form-group">
-                            <label>Grade</label>
-                            <input type="text" id="agentGrade" placeholder="Ex: Cadet, Officer, Captain">
-                        </div>
-                        <div class="form-group">
-                            <label>Division</label>
-                            <input type="text" id="agentDivision" placeholder="Ex: Patrol, SWAT, Traffic">
-                        </div>
-                    </div>
-
-                    <!-- Gestion des formations -->
-                    <div class="form-group">
-                        <label>Formations Validées (Étiquettes)</label>
-                        <div class="tags-input-group">
-                            <input type="text" id="inputFormation" placeholder="Ex: Conduite, Taser...">
-                            <button type="button" onclick="addTag('formation')">+</button>
-                        </div>
-                        <div class="active-tags" id="listFormations"></div>
-                    </div>
-
-                    <!-- Gestion des sanctions -->
-                    <div class="form-group">
-                        <label>Sanctions</label>
-                        <div class="tags-input-group">
-                            <input type="text" id="inputSanction" placeholder="Ex: Avertissement, Suspension...">
-                            <button type="button" onclick="addTag('sanction')">+</button>
-                        </div>
-                        <div class="active-tags" id="listSanctions"></div>
-                    </div>
-                </form>
-            </div>
-            
-            <div class="modal-footer">
-                <button class="btn btn-outline" id="btnCancelAgentModal">Annuler</button>
-                <button class="btn btn-primary" id="submitAgentBtn" form="agentForm" type="submit">Enregistrer</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- NOTIFICATION TOAST -->
-    <div class="toast-notification" id="toast">
-        <span id="toastMessage">Opération réussie !</span>
-    </div>
-
-    <!-- SCRIPT -->
-    <script type="module" src="js/admin.js"></script>
-</body>
-</html>
+</div>
