@@ -1586,3 +1586,46 @@ button {
 body {
     overflow-y: auto;
 }
+
+/* ============================================================
+   CORRECTION FORCÉE DU SCROLL DE LA MODALE
+   ============================================================ */
+
+/* On s'assure que le body peut scroller normalement */
+body {
+    overflow-y: auto !important;
+}
+
+/* La modale prend toute la hauteur de l'écran avec une petite marge */
+.modal-overlay {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    padding: 20px !important; 
+    box-sizing: border-box;
+    overflow: hidden; /* Empêche le fond de scroller */
+}
+
+/* Le contenu de la modale a une hauteur max et scrolle à l'intérieur */
+.modal-content {
+    max-height: calc(100vh - 40px) !important; /* 100% de l'écran - les marges */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* Empêche le contenu de sortir de la boîte */
+}
+
+/* C'est ICI que le scroll se fait */
+.modal-body {
+    overflow-y: auto !important;
+    flex: 1; /* Prend tout l'espace restant */
+    padding-right: 5px; /* Évite que la barre de scroll colle au texte */
+}
+
+/* Le footer (boutons) reste toujours visible en bas */
+.modal-footer {
+    flex-shrink: 0;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+}
