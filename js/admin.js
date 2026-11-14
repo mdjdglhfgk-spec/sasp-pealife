@@ -1,7 +1,7 @@
 import { supabase } from './supabase.js';
 
 // ==========================================
-// 1. SÉCURITÉ & CHARGEMENT
+// 1. SÉCURITÉ & INITIALISATION
 // ==========================================
 document.body.style.visibility = 'hidden';
 document.body.style.opacity = '0';
@@ -13,29 +13,21 @@ let currentSanctions = [];
 async function checkAuth() {
     try {
         const { data: { session }, error } = await supabase.auth.getSession();
-        
         if (error || !session) {
             window.location.replace('login.html');
             return false;
         }
-
         document.getElementById('loadingScreen').style.display = 'none';
         document.getElementById('adminDashboard').style.display = 'block';
         document.body.style.visibility = 'visible';
-        document.body.style.transition = 'opacity 0.3s';
         document.body.style.opacity = '1';
-        
         return true;
     } catch (err) {
-        console.error("Erreur Auth:", err);
         window.location.replace('login.html');
         return false;
     }
 }
 
-// ==========================================
-// 2. INITIALISATION
-// ==========================================
 document.addEventListener('DOMContentLoaded', async () => {
     const isAuth = await checkAuth();
     if (!isAuth) return; 
@@ -44,25 +36,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     loadPages();
     loadAgents();
 
-    // Bouton Déconnexion
+    // Déconnexion
     document.getElementById('logoutBtn').addEventListener('click', async () => {
         await supabase.auth.signOut();
         window.location.replace('login.html');
     });
 
-    // --- SYSTEME D'ONGLETS ---
+    // Onglets
     document.querySelectorAll('.admin-tab-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.admin-tab-content').forEach(c => c.classList.remove('active'));
-            
             e.target.classList.add('active');
             document.getElementById(e.target.getAttribute('data-target')).classList.add('active');
         });
     });
 
     // ==========================================
-    // LOGIQUE PAGES
+    // PARTIE PAGES
     // ==========================================
     document.getElementById('btnCreateNew').addEventListener('click', () => {
         document.getElementById('pageForm').reset();
@@ -72,15 +63,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('editorModal').classList.add('active');
     });
 
+    // Fermer la modale Page
     document.getElementById('btnCloseModal').addEventListener('click', () => document.getElementById('editorModal').classList.remove('active'));
     document.getElementById('btnCancelModal').addEventListener('click', () => document.getElementById('editorModal').classList.remove('active'));
 
+    // Recherche
     document.getElementById('searchInput').addEventListener('input', (e) => {
         const term = e.target.value.toLowerCase();
         const filtered = allPages.filter(p => p.title.toLowerCase().includes(term) || p.slug.toLowerCase().includes(term));
         renderPagesTable(filtered);
     });
 
+    // Soumission Page
     document.getElementById('pageForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const id = document.getElementById('pageId').value;
@@ -106,8 +100,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         btn.textContent = "Enregistrer";
         btn.disabled = false;
 
-        if (error) alert("Erreur : " + error.message);
-        else {
+        if (error) {
+            alert("Erreur : " + error.message);
+        } else {
             document.getElementById('editorModal').classList.remove('active');
             showToast("Page enregistrée !");
             loadPages();
@@ -115,7 +110,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     // ==========================================
-    // LOGIQUE AGENTS
+    // PARTIE AGENTS
     // ==========================================
     document.getElementById('btnCreateAgent').addEventListener('click', () => {
         document.getElementById('agentForm').reset();
@@ -128,9 +123,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('agentModal').classList.add('active');
     });
 
+    // Fermer la modale Agent
     document.getElementById('btnCloseAgentModal').addEventListener('click', () => document.getElementById('agentModal').classList.remove('active'));
     document.getElementById('btnCancelAgentModal').addEventListener('click', () => document.getElementById('agentModal').classList.remove('active'));
 
+    // Soumission Agent
     document.getElementById('agentForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const id = document.getElementById('agentId').value;
@@ -161,8 +158,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         btn.textContent = "Enregistrer";
         btn.disabled = false;
 
-        if (error) alert("Erreur Supabase : " + error.message);
-        else {
+        if (error) {
+            alert("Erreur Supabase : " + error.message);
+        } else {
             document.getElementById('agentModal').classList.remove('active');
             showToast("Agent enregistré !");
             loadAgents();
@@ -171,7 +169,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 // ==========================================
-// 3. FONCTIONS UTILITAIRES
+// FONCTIONS UTILITAIRES
 // ==========================================
 window.formatDoc = (command, value = null) => {
     document.execCommand(command, false, value);
@@ -189,10 +187,8 @@ window.addTag = (type) => {
     const select = document.getElementById(type === 'formation' ? 'selectFormation' : 'selectSanction');
     const val = select.value;
     if (!val) return;
-
     if (type === 'formation' && !currentFormations.includes(val)) currentFormations.push(val);
     else if (type === 'sanction' && !currentSanctions.includes(val)) currentSanctions.push(val);
-    
     select.value = '';
     renderTags();
 };
@@ -209,7 +205,7 @@ function renderTags() {
 }
 
 // ==========================================
-// 4. CHARGEMENT DES DONNÉES
+// CHARGEMENT DES DONNÉES
 // ==========================================
 async function loadPages() {
     const { data: pages, error } = await supabase.from('pages').select('*').order('created_at', { ascending: false });
@@ -229,11 +225,16 @@ function renderPagesTable(pagesToRender) {
     tbody.innerHTML = '';
     pagesToRender.forEach(page => {
         const tr = document.createElement('tr');
+        
+        // C'est ici que se trouve la sécurité pour les caractères spéciaux
+        const safeTitle = encodeURIComponent(page.title);
+        const safeContent = encodeURIComponent(page.content);
+
         tr.innerHTML = `
             <td>${page.title}</td>
             <td><a href="page.html?slug=${page.slug}" target="_blank" style="color:var(--gold);">/${page.slug}</a></td>
             <td style="text-align: right;">
-                <button class="btn-sm btn-edit" onclick="editPage('${page.id}', '${encodeURIComponent(page.title)}', '${page.slug}', '${encodeURIComponent(page.content)}')">Modifier</button>
+                <button class="btn-sm btn-edit" onclick="editPage('${page.id}', '${safeTitle}', '${page.slug}', '${safeContent}')">Modifier</button>
                 <button class="btn-sm btn-delete" onclick="deletePage('${page.id}')">Supprimer</button>
             </td>
         `;
@@ -242,12 +243,18 @@ function renderPagesTable(pagesToRender) {
 }
 
 window.editPage = (id, title, slug, content) => {
-    document.getElementById('pageId').value = id;
-    document.getElementById('pageTitle').value = decodeURIComponent(title);
-    document.getElementById('pageSlug').value = slug;
-    document.getElementById('editorContent').innerHTML = decodeURIComponent(content);
-    document.getElementById('modalTitle').textContent = "Modifier la page";
-    document.getElementById('editorModal').classList.add('active');
+    try {
+        document.getElementById('pageId').value = id;
+        document.getElementById('pageTitle').value = decodeURIComponent(title);
+        document.getElementById('pageSlug').value = slug;
+        // On nettoie le HTML pour l'insérer proprement dans l'éditeur
+        document.getElementById('editorContent').innerHTML = decodeURIComponent(content);
+        
+        document.getElementById('modalTitle').textContent = "Modifier la page";
+        document.getElementById('editorModal').classList.add('active');
+    } catch (err) {
+        alert("Erreur d'ouverture : " + err.message);
+    }
 };
 
 window.deletePage = async (id) => {
@@ -285,22 +292,26 @@ async function loadAgents() {
 }
 
 window.editAgent = async (id) => {
-    const { data: agent } = await supabase.from('agents').select('*').eq('id', id).single();
-    if (!agent) return;
+    try {
+        const { data: agent } = await supabase.from('agents').select('*').eq('id', id).single();
+        if (!agent) throw new Error("Agent introuvable");
 
-    document.getElementById('agentId').value = agent.id;
-    document.getElementById('agentNom').value = agent.nom;
-    document.getElementById('agentMatricule').value = agent.matricule || '';
-    document.getElementById('agentGrade').value = agent.grade || '';
-    document.getElementById('agentDivision').value = agent.division || '';
-    document.getElementById('agentSup').checked = agent.est_superviseur || false;
-    
-    currentFormations = agent.formations || [];
-    currentSanctions = agent.sanctions || [];
-    renderTags();
-    
-    document.getElementById('agentModalTitle').textContent = "Modifier l'Agent";
-    document.getElementById('agentModal').classList.add('active');
+        document.getElementById('agentId').value = agent.id;
+        document.getElementById('agentNom').value = agent.nom;
+        document.getElementById('agentMatricule').value = agent.matricule || '';
+        document.getElementById('agentGrade').value = agent.grade || '';
+        document.getElementById('agentDivision').value = agent.division || '';
+        document.getElementById('agentSup').checked = agent.est_superviseur || false;
+        
+        currentFormations = agent.formations || [];
+        currentSanctions = agent.sanctions || [];
+        renderTags();
+        
+        document.getElementById('agentModalTitle').textContent = "Modifier l'Agent";
+        document.getElementById('agentModal').classList.add('active');
+    } catch (err) {
+        alert("Erreur d'ouverture de l'agent : " + err.message);
+    }
 };
 
 window.deleteAgent = async (id) => {
