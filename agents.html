@@ -1,3 +1,100 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Registre des Agents — SASP</title>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="img/badge-sasp.png">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* Styles spécifiques à cette page pour garantir un affichage parfait */
+        .page-header-action {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .search-input-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+        }
+        .search-input-wrapper input {
+            width: 100%;
+            padding: 15px 20px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            border-radius: 8px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        .search-input-wrapper input:focus {
+            border-color: var(--gold);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NAVIGATION -->
+    <header class="navbar scrolled">
+        <div class="nav-container">
+            <a href="index.html" class="nav-brand">
+                <img src="img/badge-sasp.png" alt="SASP Logo" class="nav-logo-img">
+                <div class="nav-brand-text">
+                    <span class="brand-title">SASP</span>
+                    <span class="brand-sub">San Andreas State Police</span>
+                </div>
+            </a>
+            <nav class="nav-links">
+                <a href="index.html" class="nav-link">Accueil</a>
+                <a href="agents.html" class="nav-link active">Registre des Agents</a>
+                <a href="login.html" class="nav-link" style="color: var(--gold);">Accès Staff</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- HERO INTERNE -->
+    <section class="hero-inner">
+        <div class="hero-inner-content">
+            <div class="hero-tag"><span class="tag-line"></span> Effectif Officiel</div>
+            <h1 class="hero-title">Registre des Agents</h1>
+            <p class="hero-subtitle">Liste des membres actifs du San Andreas State Police, leurs divisions, leurs formations validées et leurs sanctions en cours.</p>
+        </div>
+    </section>
+
+    <!-- CONTENU PRINCIPAL -->
+    <main class="main-content">
+        
+        <!-- En-tête avec Titre et Recherche -->
+        <div class="page-header-action">
+            <h2 style="font-family: var(--font-heading); font-size: 2rem; color: var(--text-main);">Nos effectifs</h2>
+            <div class="search-input-wrapper">
+                <input type="text" id="searchAgent" placeholder="Rechercher un agent (Nom, Matricule, Division)...">
+            </div>
+        </div>
+
+        <!-- Grille des agents -->
+        <div class="agents-grid" id="agentsList">
+            <p style="color: var(--text-muted); grid-column: 1 / -1; text-align: center; padding: 40px;">Chargement du registre...</p>
+        </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-bottom">
+                <p class="footer-copy">© 2026 San Andreas State Police — Livret officiel de l'agent.</p>
+                <p class="footer-devise">« To Protect and To Serve »</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- SCRIPT -->
     <script type="module">
         import { supabase } from './js/supabase.js';
 
@@ -30,22 +127,22 @@
             }
 
             agentsToRender.forEach(agent => {
-                // Badge SUP
+                // 1. Badge SUP
                 const supBadge = agent.est_superviseur 
                     ? ' <span class="agent-badge" style="background:var(--gold); color:var(--bg-dark); font-weight:bold; margin-left:5px;">SUP</span>' 
                     : '';
 
-                // Formations (Étiquettes)
+                // 2. Formations
                 const formationsHtml = agent.formations && agent.formations.length > 0 
                     ? agent.formations.map(f => `<span class="tag">${f}</span>`).join('') 
-                    : '<span style="font-size:0.8rem; color:var(--text-muted);">Aucune formation</span>';
+                    : '<span style="font-size:0.8rem; color:var(--text-muted);">Aucune formation validée</span>';
 
-                // Sanctions (Badges rouges)
+                // 3. Sanctions
                 const sanctionsHtml = agent.sanctions && agent.sanctions.length > 0
                     ? agent.sanctions.map(s => `<span class="agent-badge sanction">${s}</span>`).join('')
                     : '';
 
-                // Gestion des divisions multiples
+                // 4. Divisions
                 let divisionsHtml = '<span class="agent-badge">Aucune division</span>';
                 if (agent.division) {
                     if (Array.isArray(agent.division)) {
@@ -55,6 +152,7 @@
                     }
                 }
 
+                // 5. Création de la carte
                 const card = document.createElement('div');
                 card.className = 'agent-card';
                 
@@ -71,14 +169,15 @@
                         ${divisionsHtml}
                     </div>
 
-                    <!-- SANCTIONS BIEN VISIBLES -->
+                    <!-- SANCTIONS (Alerte rouge) -->
                     ${sanctionsHtml ? `
-                    <div style="background: rgba(239, 68, 68, 0.1); border-left: 4px solid #ef4444; padding: 10px 15px; margin-bottom: 15px; border-radius: 4px;">
+                    <div style="background: rgba(239, 68, 68, 0.1); border-left: 4px solid #ef4444; padding: 10px 15px; margin-bottom: 20px; border-radius: 4px;">
                         <div style="font-size: 0.75rem; color: #ef4444; text-transform: uppercase; font-weight: bold; margin-bottom: 5px;">⚠️ Sanctions en cours</div>
                         <div class="agent-info-row">${sanctionsHtml}</div>
                     </div>` : ''}
 
-                    <div style="margin-top: 15px;">
+                    <!-- FORMATIONS -->
+                    <div style="margin-top: auto; border-top: 1px solid var(--border); padding-top: 15px;">
                         <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Formations Validées</div>
                         <div class="tags-container">${formationsHtml}</div>
                     </div>
@@ -106,3 +205,5 @@
         // Lancer le chargement
         fetchAgents();
     </script>
+</body>
+</html>
