@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Registre des Agents — SASP</title>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="img/badge-sasp.png">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <header class="navbar scrolled">
+        <div class="nav-container">
+            <a href="index.html" class="nav-brand">
+                <img src="img/badge-sasp.png" alt="SASP Logo" class="nav-logo-img">
+                <div class="nav-brand-text">
+                    <span class="brand-title">SASP</span>
+                    <span class="brand-sub">San Andreas State Police</span>
+                </div>
+            </a>
+            <nav class="nav-links">
+                <a href="index.html" class="nav-link">Accueil</a>
+                <a href="agents.html" class="nav-link active">Registre des Agents</a>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero-inner">
+        <div class="hero-inner-content">
+            <div class="hero-tag"><span class="tag-line"></span> Effectif Officiel</div>
+            <h1 class="hero-title">Registre des Agents</h1>
+            <p class="hero-subtitle">Liste des membres actifs du San Andreas State Police, leurs formations et leurs divisions.</p>
+        </div>
+    </section>
+
+    <main class="main-content">
+        <div class="agents-grid" id="agentsList">
+            <p style="color: var(--text-muted);">Chargement du registre...</p>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-bottom">
+                <p class="footer-copy">© 2026 San Andreas State Police.</p>
+                <p class="footer-devise">« To Protect and To Serve »</p>
+            </div>
+        </div>
+    </footer>
+
+    <script type="module">
+        import { supabase } from './js/supabase.js';
+
+        async function loadAgents() {
+            const container = document.getElementById('agentsList');
+            const { data: agents, error } = await supabase.from('agents').select('*').order('nom', { ascending: true });
+
+            if (error || !agents || agents.length === 0) {
+                container.innerHTML = `<p style="color: var(--text-muted);">Aucun agent enregistré pour le moment.</p>`;
+                return;
+            }
+
+            container.innerHTML = '';
+            agents.forEach(agent => {
+                // On génère les étiquettes de formation
+                const formationsHtml = agent.formations && agent.formations.length > 0 
+                    ? agent.formations.map(f => `<span class="tag">${f}</span>`).join('') 
+                    : '<span style="font-size:0.8rem; color:var(--text-muted);">Aucune formation</span>';
+
+                // On génère les sanctions
+                const sanctionsHtml = agent.sanctions && agent.sanctions.length > 0
+                    ? agent.sanctions.map(s => `<span class="agent-badge sanction">${s}</span>`).join('')
+                    : '';
+
+                const card = document.createElement('div');
+                card.className = 'agent-card';
+                card.innerHTML = `
+                    <div class="agent-header">
+                        <div>
+                            <div class="agent-name">${agent.nom}</div>
+                            <div class="agent-matricule">#${agent.matricule || '0000'}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="agent-info-row">
+                        <span class="agent-badge grade">${agent.grade || 'Non assigné'}</span>
+                        <span class="agent-badge">${agent.division || 'Aucune division'}</span>
+                    </div>
+
+                    <div style="margin-top: 15px;">
+                        <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;">Formations Validées</div>
+                        <div class="tags-container">${formationsHtml}</div>
+                    </div>
+
+                    ${sanctionsHtml ? `
+                    <div style="margin-top: 15px;">
+                        <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;">Sanctions</div>
+                        <div class="agent-info-row">${sanctionsHtml}</div>
+                    </div>` : ''}
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        loadAgents();
+    </script>
+</body>
+</html>
