@@ -2,98 +2,237 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Éditer — SASP</title>
+    <title>SASP — Édition en direct</title>
     <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="img/badge-sasp.png">
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* Styles spécifiques pour l'éditeur split-screen */
+        .editor-layout {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            background: var(--bg-dark);
+        }
+        .editor-panel {
+            width: 50%;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            border-right: 1px solid var(--border);
+        }
+        .preview-panel {
+            width: 50%;
+            background: var(--bg-darker);
+            display: flex;
+            flex-direction: column;
+        }
+        .preview-header {
+            padding: 15px 30px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        iframe {
+            flex: 1;
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: var(--bg-dark);
+        }
+        /* Ajustement des inputs pour qu'ils prennent bien la place */
+        #editContent {
+            flex: 1;
+            min-height: 300px;
+            font-family: monospace;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            background: var(--bg-darker);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 15px;
+            resize: none;
+            outline: none;
+        }
+        #editContent:focus { border-color: var(--gold); }
+    </style>
 </head>
-<body class="admin-body" style="padding: 40px; display: block; overflow-y: auto;">
+<body>
 
-    <div class="admin-panel" style="max-width: 1000px; margin: 0 auto;">
-        <div class="panel-header" style="margin-bottom: 20px;">
-            <h3>Édition de la page</h3>
-            <p>Modifiez le contenu ci-dessous et cliquez sur Enregistrer.</p>
-        </div>
+    <div class="editor-layout">
+        
+        <!-- PANNEAU GAUCHE : FORMULAIRE -->
+        <div class="editor-panel">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h1 style="font-family: var(--font-heading); color: var(--gold); font-size: 1.8rem;">Éditeur</h1>
+                <a href="admin.html" class="btn btn-outline" style="font-size: 0.8rem; padding: 6px 12px;">Retour Admin</a>
+            </div>
 
-        <form id="editPageForm">
-            <input type="hidden" id="editId">
-            
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+            <form id="editPageForm" style="display: flex; flex-direction: column; height: 100%;">
+                <input type="hidden" id="editId">
+                
                 <div class="form-group">
                     <label>Titre de la page</label>
                     <input type="text" id="editTitle" required>
                 </div>
+                
                 <div class="form-group">
                     <label>Slug (URL)</label>
                     <input type="text" id="editSlug" required>
                 </div>
-            </div>
 
-            <div class="form-group">
-                <label>Contenu (HTML accepté)</label>
-                <textarea id="editContent" style="width: 100%; height: 400px; padding: 15px; background: var(--bg-dark); color: var(--text-main); border: 1px solid var(--border); font-family: monospace; font-size: 1rem;"></textarea>
-            </div>
+                <div class="form-group" style="flex: 1; display: flex; flex-direction: column;">
+                    <label>Contenu (HTML accepté)</label>
+                    <textarea id="editContent" required></textarea>
+                </div>
 
-            <div style="display: flex; gap: 15px; justify-content: flex-end; margin-top: 20px;">
-                <a href="admin.html" class="btn btn-outline">Retour</a>
-                <button type="submit" class="btn btn-primary" id="saveBtn">Enregistrer les modifications</button>
+                <div style="display: flex; gap: 10px; margin-top: 15px;">
+                    <button type="submit" class="btn btn-primary" id="saveBtn" style="flex: 1;">Enregistrer les modifications</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- PANNEAU DROIT : APERÇU EN DIRECT -->
+        <div class="preview-panel">
+            <div class="preview-header">
+                <span>Aperçu en direct</span>
+                <span id="previewStatus" style="color: var(--success);">● En ligne</span>
             </div>
-        </form>
+            <iframe id="previewFrame"></iframe>
+        </div>
+
     </div>
 
     <script type="module">
         import { supabase } from './js/supabase.js';
 
-        // Récupérer l'ID dans l'URL
         const urlParams = new URLSearchParams(window.location.search);
         const pageId = urlParams.get('id');
 
-        if (!pageId) {
-            alert("Aucune page sélectionnée.");
-            window.location.href = 'admin.html';
-        }
+        const form = document.getElementById('editPageForm');
+        const titleInput = document.getElementById('editTitle');
+        const slugInput = document.getElementById('editSlug');
+        const contentInput = document.getElementById('editContent');
+        const previewFrame = document.getElementById('previewFrame');
 
-        // Charger les données de la page
-        async function loadPageData() {
-            const { data: page, error } = await supabase.from('pages').select('*').eq('id', pageId).single();
-            if (error || !page) {
-                alert("Erreur de chargement de la page.");
-                window.location.href = 'admin.html';
-                return;
+        // 1. Charger la page si un ID est présent
+        if (pageId) {
+            async function loadPageData() {
+                const { data: page, error } = await supabase.from('pages').select('*').eq('id', pageId).single();
+                if (error || !page) {
+                    alert("Erreur de chargement de la page.");
+                    window.location.href = 'admin.html';
+                    return;
+                }
+
+                document.getElementById('editId').value = page.id;
+                titleInput.value = page.title;
+                slugInput.value = page.slug;
+                contentInput.value = page.content;
+                
+                updatePreview(); // Met à jour l'aperçu au chargement
             }
-
-            document.getElementById('editId').value = page.id;
-            document.getElementById('editTitle').value = page.title;
-            document.getElementById('editSlug').value = page.slug;
-            document.getElementById('editContent').value = page.content;
+            loadPageData();
         }
 
-        loadPageData();
+        // 2. Fonction pour mettre à jour l'aperçu
+        function updatePreview() {
+            const title = titleInput.value || 'Titre de la page';
+            const content = contentInput.value || '<p style="color: #666;">Commencez à taper pour voir l\'aperçu...</p>';
 
-        // Enregistrer
-        document.getElementById('editPageForm').addEventListener('submit', async (e) => {
+            // On injecte le HTML formaté comme sur page.html
+            const previewHtml = `
+                <!DOCTYPE html>
+                <html lang="fr">
+                <head>
+                    <meta charset="UTF-8">
+                    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+                    <link rel="stylesheet" href="css/style.css">
+                    <style>
+                        body { padding: 40px; background: var(--bg-dark); color: var(--text-main); }
+                        .preview-container { max-width: 800px; margin: 0 auto; }
+                        .preview-title { font-family: var(--font-heading); font-size: 2.5rem; color: var(--white); text-transform: uppercase; margin-bottom: 20px; border-bottom: 2px solid var(--gold); padding-bottom: 10px; }
+                        .preview-content { font-size: 1.1rem; line-height: 1.7; color: var(--text-muted); }
+                        .preview-content h3 { color: var(--gold); font-family: var(--font-heading); margin-top: 20px; text-transform: uppercase; }
+                    </style>
+                </head>
+                <body>
+                    <div class="preview-container">
+                        <h1 class="preview-title">${title}</h1>
+                        <div class="preview-content">${content}</div>
+                    </div>
+                </body>
+                </html>
+            `;
+
+            // On écrit dans l'iframe
+            const doc = previewFrame.contentDocument || previewFrame.contentWindow.document;
+            doc.open();
+            doc.write(previewHtml);
+            doc.close();
+        }
+
+        // 3. Événements pour l'aperçu en direct (Input = à chaque lettre)
+        titleInput.addEventListener('input', updatePreview);
+        contentInput.addEventListener('input', updatePreview);
+
+        // 4. Enregistrement
+        form.addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('saveBtn');
+            const status = document.getElementById('previewStatus');
+
             btn.textContent = "Enregistrement...";
             btn.disabled = true;
+            status.textContent = "● Sauvegarde...";
+            status.style.color = "var(--gold)";
 
             const updateData = {
-                title: document.getElementById('editTitle').value,
-                slug: document.getElementById('editSlug').value,
-                content: document.getElementById('editContent').value
+                title: titleInput.value,
+                slug: slugInput.value,
+                content: contentInput.value
             };
 
-            const { error } = await supabase.from('pages').update(updateData).eq('id', pageId);
+            let error;
+            if (pageId) {
+                // Mise à jour
+                const { error: err } = await supabase.from('pages').update(updateData).eq('id', pageId);
+                error = err;
+            } else {
+                // Création
+                const { error: err } = await supabase.from('pages').insert([updateData]);
+                error = err;
+            }
+
+            btn.textContent = "Enregistrer les modifications";
+            btn.disabled = false;
 
             if (error) {
+                status.textContent = "● Erreur";
+                status.style.color = "var(--error)";
                 alert("Erreur : " + error.message);
-                btn.textContent = "Enregistrer";
-                btn.disabled = false;
             } else {
-                alert("Page enregistrée avec succès !");
-                window.location.href = 'admin.html';
+                status.textContent = "● Enregistré !";
+                status.style.color = "var(--success)";
+                setTimeout(() => {
+                    status.textContent = "● En ligne";
+                    if (!pageId) window.location.href = 'admin.html'; // Si c'était une création, on retourne à l'admin
+                }, 1500);
             }
         });
+
+        // Initialiser l'aperçu vide si pas d'ID
+        if (!pageId) {
+            updatePreview();
+        }
     </script>
 </body>
 </html>
