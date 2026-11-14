@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 // ==========================================
-// GESTION DES PAGES
+// PAGES
 // ==========================================
 async function loadPages() {
     const { data: pages, error } = await supabase.from('pages').select('*').order('created_at', { ascending: false });
@@ -94,20 +94,16 @@ window.deletePage = async (id) => {
 };
 
 // ==========================================
-// GESTION DES AGENTS (Mise à jour Divisions)
+// AGENTS
 // ==========================================
 document.getElementById('btnCreateAgent').addEventListener('click', () => {
     document.getElementById('agentForm').reset();
     document.getElementById('agentId').value = '';
     document.getElementById('agentSup').checked = false;
-    
-    // On décoche toutes les divisions
     document.querySelectorAll('.agent-div-checkbox').forEach(cb => cb.checked = false);
-
     currentFormations = [];
     currentSanctions = [];
     renderTags();
-    
     document.getElementById('agentModalTitle').textContent = "Ajouter un Agent";
     document.getElementById('agentModal').classList.add('active');
 });
@@ -120,14 +116,13 @@ document.getElementById('agentForm').addEventListener('submit', async (e) => {
     const id = document.getElementById('agentId').value;
     const btn = document.getElementById('submitAgentBtn');
     
-    // On récupère toutes les divisions cochées
     const selectedDivisions = Array.from(document.querySelectorAll('.agent-div-checkbox:checked')).map(cb => cb.value);
 
     const agentData = {
         nom: document.getElementById('agentNom').value,
         matricule: document.getElementById('agentMatricule').value,
         grade: document.getElementById('agentGrade').value,
-        division: selectedDivisions, // Tableau de divisions
+        division: selectedDivisions,
         est_superviseur: document.getElementById('agentSup').checked,
         formations: currentFormations,
         sanctions: currentSanctions
@@ -149,7 +144,7 @@ document.getElementById('agentForm').addEventListener('submit', async (e) => {
     btn.disabled = false;
 
     if (error) {
-        alert("Erreur Supabase : " + error.message);
+        alert("Erreur : " + error.message);
     } else {
         document.getElementById('agentModal').classList.remove('active');
         showToast("Agent enregistré !");
@@ -162,7 +157,7 @@ async function loadAgents() {
     const { data: agents, error } = await supabase.from('agents').select('*').order('nom', { ascending: true });
 
     if (error || !agents || agents.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Aucun agent.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Aucun agent.</td></tr>';
         return;
     }
 
@@ -171,15 +166,25 @@ async function loadAgents() {
         const tr = document.createElement('tr');
         const supBadge = agent.est_superviseur ? ' <span class="agent-badge" style="background:var(--gold); color:var(--bg-dark); font-weight:bold; margin-left:5px; font-size:0.7rem;">SUP</span>' : '';
         
-        // On formate les divisions sous forme de badges dans le tableau
-        const divisionsDisplay = (agent.division && Array.isArray(agent.division)) 
-            ? agent.division.map(d => `<span class="agent-badge" style="margin-right: 4px;">${d}</span>`).join('') 
-            : (agent.division ? agent.division : '-');
+        let divisionsDisplay = '-';
+        if (agent.division) {
+            if (Array.isArray(agent.division)) {
+                divisionsDisplay = agent.division.map(d => `<span class="div-badge-admin">${d}</span>`).join('');
+            } else {
+                divisionsDisplay = `<span class="div-badge-admin">${agent.division}</span>`;
+            }
+        }
+
+        let sanctionsDisplay = '-';
+        if (agent.sanctions && agent.sanctions.length > 0) {
+            sanctionsDisplay = agent.sanctions.map(s => `<span class="agent-badge sanction" style="font-size:0.7rem; margin-bottom:2px;">${s}</span>`).join(' ');
+        }
 
         tr.innerHTML = `
             <td>${agent.nom}${supBadge}</td>
             <td><span class="agent-badge grade">${agent.grade || '-'}</span></td>
             <td>${divisionsDisplay}</td>
+            <td>${sanctionsDisplay}</td>
             <td style="text-align: right;">
                 <button class="btn-sm btn-edit" onclick="editAgent('${agent.id}')">Modifier</button>
                 <button class="btn-sm btn-delete" onclick="deleteAgent('${agent.id}')">Supprimer</button>
@@ -199,7 +204,6 @@ window.editAgent = async (id) => {
     document.getElementById('agentGrade').value = agent.grade || '';
     document.getElementById('agentSup').checked = agent.est_superviseur || false;
     
-    // On coche les bonnes divisions
     const agentDivisions = Array.isArray(agent.division) ? agent.division : [agent.division];
     document.querySelectorAll('.agent-div-checkbox').forEach(cb => {
         cb.checked = agentDivisions.includes(cb.value);
@@ -220,7 +224,6 @@ window.deleteAgent = async (id) => {
     }
 };
 
-// OUTILS
 function showToast(message) {
     const toast = document.getElementById('toast');
     document.getElementById('toastMessage').textContent = message;
