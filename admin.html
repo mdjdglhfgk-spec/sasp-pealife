@@ -17,6 +17,8 @@
 
     <!-- DASHBOARD -->
     <div class="admin-dashboard" id="adminDashboard" style="display: none;">
+        
+        <!-- SIDEBAR -->
         <aside class="admin-sidebar">
             <div class="admin-brand">
                 <img src="img/badge-sasp.png" alt="SASP">
@@ -33,6 +35,7 @@
             <button id="logoutBtn" class="btn btn-outline" style="margin-top: auto;">Déconnexion</button>
         </aside>
 
+        <!-- MAIN CONTENT -->
         <main class="admin-main">
             <div class="admin-topbar">
                 <h2>Gestion de la faction</h2>
@@ -41,12 +44,13 @@
                 </div>
             </div>
 
+            <!-- SYSTEME D'ONGLETS -->
             <div class="admin-tabs">
                 <button class="admin-tab-btn active" data-target="tab-pages">📄 Pages du site</button>
                 <button class="admin-tab-btn" data-target="tab-agents">👮 Registre des Agents</button>
             </div>
 
-            <!-- ONGLET PAGES -->
+            <!-- ================= ONGLET PAGES ================= -->
             <div id="tab-pages" class="admin-tab-content active">
                 <div class="admin-panel">
                     <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
@@ -54,11 +58,14 @@
                             <h3>Gestion des pages</h3>
                             <p>Cliquez sur "Modifier" pour éditer une page.</p>
                         </div>
+                        <!-- Le bouton pour créer une page redirige vers editer.html -->
                         <a href="editer.html" class="btn btn-primary" style="padding: 10px 20px; text-decoration: none;">+ Nouvelle Page</a>
                     </div>
+
                     <div class="admin-search-bar">
-                        <input type="text" id="searchInput" placeholder="Rechercher une page...">
+                        <input type="text" id="searchInput" placeholder="Rechercher une page par titre...">
                     </div>
+                    
                     <div class="table-responsive">
                         <table class="admin-table">
                             <thead>
@@ -76,7 +83,7 @@
                 </div>
             </div>
 
-            <!-- ONGLET AGENTS -->
+            <!-- ================= ONGLET AGENTS ================= -->
             <div id="tab-agents" class="admin-tab-content">
                 <div class="admin-panel">
                     <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
@@ -86,6 +93,7 @@
                         </div>
                         <button class="btn btn-primary" id="btnCreateAgent" style="padding: 10px 20px;">+ Nouvel Agent</button>
                     </div>
+                    
                     <div class="table-responsive">
                         <table class="admin-table">
                             <thead>
@@ -93,7 +101,7 @@
                                     <th>Nom Prénom</th>
                                     <th>Grade</th>
                                     <th>Division</th>
-                                    <th>Sanctions</th> <!-- LA COLONNE EST ICI -->
+                                    <th>Sanctions</th> <!-- LA COLONNE SANCTIONS EST ICI -->
                                     <th style="text-align: right;">Actions</th>
                                 </tr>
                             </thead>
@@ -104,20 +112,25 @@
                     </div>
                 </div>
             </div>
+
         </main>
     </div>
 
-    <!-- MODALE AGENT -->
+    <!-- ========================================== -->
+    <!-- MODALE : GESTION DES AGENTS                -->
+    <!-- ========================================== -->
     <div class="modal-overlay" id="agentModal">
         <div class="modal-content">
             <div class="modal-header">
                 <h3 id="agentModalTitle">Ajouter un Agent</h3>
                 <button class="modal-close" id="btnCloseAgentModal">&times;</button>
             </div>
+            
             <div class="modal-body">
                 <form id="agentForm">
                     <input type="hidden" id="agentId">
                     
+                    <!-- NOM & MATRICULE -->
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                         <div class="form-group">
                             <label>Nom Prénom</label>
@@ -129,22 +142,24 @@
                         </div>
                     </div>
 
+                    <!-- GRADE -->
                     <div class="form-group">
                         <label>Grade</label>
                         <select id="agentGrade">
                             <option value="">Sélectionner un grade...</option>
-                            <option value="Cadet">Cadet</option>
-                            <option value="Officer">Officer</option>
-                            <option value="Officer II">Officer II</option>
-                            <option value="Officer III">Officer III</option>
-                            <option value="Sergeant">Sergeant</option>
+                            <option value="Capitaine">Capitaine</option>
                             <option value="Lieutenant">Lieutenant</option>
-                            <option value="Captain">Captain</option>
-                            <option value="Commander">Commander</option>
-                            <option value="Chief">Chief</option>
+                            <option value="Sergeant II">Sergeant II</option>
+                            <option value="Sergeant I">Sergeant I</option>
+                            <option value="SLO">SLO</option>
+                            <option value="Officier III">Officier III</option>
+                            <option value="Officier II">Officier II</option>
+                            <option value="Officier I">Officier I</option>
+                            <option value="Rookie">Rookie</option>
                         </select>
                     </div>
 
+                    <!-- DIVISIONS MULTIPLES (Pastilles) -->
                     <div class="form-group">
                         <label>Divisions (Sélection multiple)</label>
                         <div class="division-pill-group">
@@ -157,11 +172,25 @@
                         </div>
                     </div>
 
+                    <!-- SPÉCIALISATIONS (Pastilles violettes) -->
+                    <div class="form-group">
+                        <label>Spécialisations</label>
+                        <div class="division-pill-group">
+                            <label class="division-pill spec-pill"><input type="checkbox" value="Sniper" class="agent-spec-checkbox"> <span>Sniper</span></label>
+                            <label class="division-pill spec-pill"><input type="checkbox" value="Négociateur" class="agent-spec-checkbox"> <span>Négociateur</span></label>
+                            <label class="division-pill spec-pill"><input type="checkbox" value="Pilote" class="agent-spec-checkbox"> <span>Pilote</span></label>
+                            <label class="division-pill spec-pill"><input type="checkbox" value="Plongeur" class="agent-spec-checkbox"> <span>Plongeur</span></label>
+                            <label class="division-pill spec-pill"><input type="checkbox" value="Démineur" class="agent-spec-checkbox"> <span>Démineur</span></label>
+                        </div>
+                    </div>
+
+                    <!-- SUPERVISEUR -->
                     <div class="form-group" style="display: flex; align-items: center; gap: 10px; background: rgba(212, 175, 55, 0.1); padding: 15px; border-radius: 6px; border: 1px solid var(--gold); margin-top: 20px;">
                         <input type="checkbox" id="agentSup" style="width: 20px; height: 20px; cursor: pointer; accent-color: var(--gold);">
                         <label for="agentSup" style="margin: 0; cursor: pointer; color: var(--gold); font-weight: bold;">Supervisor de Terrain (SUP)</label>
                     </div>
 
+                    <!-- FORMATIONS -->
                     <div class="form-group">
                         <label>Formations Validées</label>
                         <div class="tags-input-group">
@@ -179,6 +208,7 @@
                         <div class="active-tags" id="listFormations"></div>
                     </div>
 
+                    <!-- SANCTIONS -->
                     <div class="form-group">
                         <label>Sanctions</label>
                         <div class="tags-input-group">
@@ -195,6 +225,7 @@
                     </div>
                 </form>
             </div>
+            
             <div class="modal-footer">
                 <button class="btn btn-outline" id="btnCancelAgentModal">Annuler</button>
                 <button class="btn btn-primary" id="submitAgentBtn" form="agentForm" type="submit">Enregistrer</button>
@@ -202,10 +233,12 @@
         </div>
     </div>
 
+    <!-- NOTIFICATION TOAST -->
     <div class="toast-notification" id="toast">
         <span id="toastMessage">Opération réussie !</span>
     </div>
 
+    <!-- SCRIPT -->
     <script type="module" src="js/admin.js"></script>
 </body>
 </html>
