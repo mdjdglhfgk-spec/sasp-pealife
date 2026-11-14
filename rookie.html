@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manuel Rookie — SASP</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <link rel="icon" type="image/png" href="img/badge-sasp.png">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <!-- NAVIGATION IDENTIQUE -->
+    <header class="navbar" id="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="nav-brand">
+                <img src="img/badge-sasp.png" alt="SASP Logo" class="nav-logo-img">
+                <div class="nav-brand-text">
+                    <span class="brand-title">SASP</span>
+                    <span class="brand-sub">San Andreas State Police</span>
+                </div>
+            </a>
+            <nav class="nav-links">
+                <a href="index.html" class="nav-link">Accueil</a>
+                <a href="rookie.html" class="nav-link active">Rookie</a> <!-- Lien ACTIF ici -->
+                <a href="agents.html" class="nav-link">Agents</a>
+                <a href="procedure.html" class="nav-link">Procédure</a>
+                <a href="division.html" class="nav-link">Divisions</a>
+                <a href="pa.html" class="nav-link">Police Academy</a>
+                <a href="reglement.html" class="nav-link">Règlement</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- EN-TÊTE DE LA PAGE INTERNE (Hero Inner) -->
+    <section class="hero-inner">
+        <div class="hero-watermark">
+            <img src="img/badge-sasp.png" alt="">
+        </div>
+        <div class="hero-inner-content">
+            <div class="hero-tag">
+                <span class="tag-line"></span>
+                Formation Initiale
+            </div>
+            <h1 class="hero-title">Manuel du Rookie</h1>
+            <p class="hero-subtitle">
+                Les bases fondamentales de l'agent de police. Tout ce que vous devez savoir pour vos premières patrouilles au sein du SASP.
+            </p>
+        </div>
+    </section>
+
+    <!-- CONTENU SPÉCIFIQUE À LA PAGE -->
+    <main class="main-content">
+        
+        <section class="section reveal">
+            <div class="section-layout">
+                <div class="section-side">
+                    <span class="section-num">01</span>
+                    <h2 class="section-title">Tenue & Équipement</h2>
+                </div>
+                <div class="section-body">
+                    <p class="section-text">
+                        Votre apparence est le reflet de notre institution. En tant que Rookie, vous devez respecter une tenue irréprochable et porter l'équipement réglementaire en toute circonstance.
+                    </p>
+                    <div class="info-grid">
+                        <div class="info-box">
+                            <h3>Uniforme Standard</h3>
+                            <p>Chemise bleue, pantalon bleu marine, ceinture tactique complète (menottes, arme de service, radio).</p>
+                        </div>
+                        <div class="info-box">
+                            <h3>Véhicule</h3>
+                            <p>Vérifiez toujours le niveau d'essence et l'état des gyrophares avant de prendre votre patrouille.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section reveal">
+            <div class="section-layout">
+                <div class="section-side">
+                    <span class="section-num">02</span>
+                    <h2 class="section-title">Les Bases du Terrain</h2>
+                </div>
+                <div class="section-body">
+                    <p class="section-text">
+                        En intervention, votre sécurité et celle de votre coéquipier passent avant tout. Appliquez ces règles strictes :
+                    </p>
+                    <ul class="custom-list">
+                        <li>Ne patrouillez jamais seul, sauf autorisation exceptionnelle.</li>
+                        <li>Prévenez toujours le central (Dispatch) avant de descendre du véhicule pour une intervention.</li>
+                        <li>L'usage de la force doit être proportionné et justifié par la situation.</li>
+                        <li>Le respect des citoyens est notre priorité absolue.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER IDENTIQUE -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-brand">
+                <img src="img/badge-sasp.png" alt="SASP Logo" class="footer-logo">
+                <div>
+                    <span class="footer-title">SASP</span>
+                    <span class="footer-sub">San Andreas State Police</span>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p class="footer-copy">© 2026 San Andreas State Police — Livret officiel de l'agent.</p>
+                <p class="footer-devise">« To Protect and To Serve »</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        window.addEventListener('scroll', () => {
+            const scrollTop = window.scrollY;
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const progress = (scrollTop / docHeight) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+            
+            const navbar = document.getElementById('navbar');
+            if (scrollTop > 50) navbar.classList.add('scrolled');
+            else navbar.classList.remove('scrolled');
+        });
+
+        const reveals = document.querySelectorAll('.reveal');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1 });
+        reveals.forEach(reveal => observer.observe(reveal));
+    </script>
+</body>
+</html>

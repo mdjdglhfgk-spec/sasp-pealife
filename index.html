@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>SASP — Accueil</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="img/badge-sasp.png">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <header class="navbar" id="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="nav-brand">
+                <img src="img/badge-sasp.png" alt="SASP Logo" class="nav-logo-img">
+                <div class="nav-brand-text">
+                    <span class="brand-title">SASP</span>
+                    <span class="brand-sub">San Andreas State Police</span>
+                </div>
+            </a>
+ <nav class="nav-links">
+    <a href="index.html" class="nav-link active">Accueil</a>
+    <!-- On pointe vers page.html en passant le slug en paramètre -->
+    <a href="page.html?slug=rookie" class="nav-link">Rookie</a>
+    <a href="page.html?slug=agents" class="nav-link">Agents</a>
+    <a href="page.html?slug=procedure" class="nav-link">Procédure</a>
+    <a href="page.html?slug=division" class="nav-link">Divisions</a>
+    <a href="page.html?slug=reglement" class="nav-link">Règlement</a>
+</nav>
+        </div>
+    </header>
+
+    <section class="hero" style="position: relative; min-height: 80vh; display: flex; align-items: center; padding: 120px 40px 60px; border-bottom: 1px solid var(--border); overflow: hidden; background: var(--bg-darker);">
+        <div class="hero-watermark" style="position: absolute; top: 50%; right: -10%; transform: translateY(-50%); width: 60vw; max-width: 800px; opacity: 0.03; z-index: 0;">
+            <img src="img/badge-sasp.png" alt="" style="filter: brightness(0) invert(1);">
+        </div>
+        <div style="position: relative; z-index: 1; max-width: 1400px; width: 100%; margin: 0 auto;">
+            <div class="hero-tag"><span class="tag-line"></span> Livret officiel de l'agent</div>
+            <h1 class="hero-title" style="font-size: clamp(3.5rem, 6vw, 6rem); line-height: 0.95; text-transform: uppercase; margin-bottom: 30px;">
+                San Andreas<br><span class="text-gold">State Police</span>
+            </h1>
+            <p class="hero-subtitle" style="max-width: 600px; margin-bottom: 40px; border-left: 2px solid var(--border); padding-left: 20px; color: var(--text-muted); font-size: 1.1rem;">
+                « To Protect and To Serve »<br>Le guide de référence de l'agent du SASP.
+            </p>
+        </div>
+    </section>
+
+    <main class="main-content">
+        <section class="section reveal" id="presentation">
+            <div class="section-layout">
+                <div class="section-side">
+                    <span class="section-num">01</span>
+                    <h2 class="section-title">Présentation</h2>
+                </div>
+                <div class="section-body">
+                    <p class="section-text">
+                        Ce site est votre Bible. Il reprend les différentes parties du travail d'agent de police au sein du San Andreas State Police.
+                    </p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- BOUTON D'ACCÈS ADMIN DISCRET -->
+    <div class="admin-access">
+        <a href="login.html">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15V17M12 7V11M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 16.9706 3 12 3C7.02944 3 3 7.02944 3 12C3 16.9706 7.02944 21 12 21Z"/></svg>
+            Accès Staff
+        </a>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-bottom">
+                <p class="footer-copy">© 2026 San Andreas State Police.</p>
+                <p class="footer-devise">« To Protect and To Serve »</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Chargement... — SASP</title>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="img/badge-sasp.png">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="nav-brand">
+                <img src="img/badge-sasp.png" alt="SASP Logo" class="nav-logo-img">
+                <div class="nav-brand-text">
+                    <span class="brand-title">SASP</span>
+                    <span class="brand-sub">San Andreas State Police</span>
+                </div>
+            </a>
+            <nav class="nav-links">
+                <a href="index.html" class="nav-link">Accueil</a>
+                <a href="page.html?slug=rookie" class="nav-link">Rookie</a>
+                <a href="page.html?slug=agents" class="nav-link">Agents</a>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero-inner">
+        <div class="hero-inner-content">
+            <h1 class="hero-title" id="pageTitleDisplay">Chargement...</h1>
+        </div>
+    </section>
+
+    <main class="main-content" id="pageContentDisplay">
+        <p style="color: var(--text-muted);">Récupération des données...</p>
+    </main>
+
+    <script type="module">
+        import { supabase } from './js/supabase.js';
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const slug = urlParams.get('slug');
+
+        if (!slug) {
+            document.getElementById('pageTitleDisplay').textContent = "Erreur 404";
+            document.getElementById('pageContentDisplay').innerHTML = "<p>Page introuvable.</p>";
+        } else {
+            const { data: page, error } = await supabase.from('pages').select('*').eq('slug', slug).single();
+
+            if (error || !page) {
+                document.getElementById('pageTitleDisplay').textContent = "Erreur 404";
+                document.getElementById('pageContentDisplay').innerHTML = "<p>Cette page n'existe pas.</p>";
+            } else {
+                document.title = page.title + " — SASP";
+                document.getElementById('pageTitleDisplay').textContent = page.title;
+                document.getElementById('pageContentDisplay').innerHTML = `
+                    <section class="section reveal active">
+                        <div class="section-layout">
+                            <div class="section-side">
+                                <h2 class="section-title">Contenu</h2>
+                            </div>
+                            <div class="section-body">
+                                ${page.content}
+                            </div>
+                        </div>
+                    </section>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

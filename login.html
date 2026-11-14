@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>SASP — Accès Sécurisé</title>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="img/badge-sasp.png">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="login-body">
+
+    <!-- Filigrane de fond -->
+    <div class="login-watermark">
+        <img src="img/badge-sasp.png" alt="">
+    </div>
+
+    <div class="login-wrapper">
+        <!-- Carte de connexion -->
+        <div class="login-card">
+            <div class="login-header">
+                <div class="login-logo">
+                    <img src="img/badge-sasp.png" alt="SASP">
+                </div>
+                <h2>Accès Restreint</h2>
+                <p>Système de gestion du San Andreas State Police</p>
+            </div>
+
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>Email Administrateur</label>
+                    <input type="email" id="email" required placeholder="agent@sasp.gov">
+                </div>
+                <div class="form-group">
+                    <label>Mot de passe</label>
+                    <input type="password" id="password" required placeholder="••••••••">
+                </div>
+                
+                <button type="submit" class="btn btn-primary" id="loginBtn" style="width: 100%; margin-top: 10px;">
+                    Se connecter
+                </button>
+                
+                <div id="statusMsg" class="status-message"></div>
+            </form>
+
+            <div class="login-footer">
+                <a href="index.html">&larr; Retour au site public</a>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { supabase } from './js/supabase.js';
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const msg = document.getElementById('statusMsg');
+            const btn = document.getElementById('loginBtn');
+
+            btn.textContent = "Vérification...";
+            btn.disabled = true;
+            msg.className = 'status-message';
+            msg.textContent = '';
+
+            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+            if (error) {
+                msg.className = 'status-message error';
+                msg.textContent = "Identifiants incorrects. Accès refusé.";
+                btn.textContent = "Se connecter";
+                btn.disabled = false;
+            } else {
+                msg.className = 'status-message success';
+                msg.textContent = "Authentification validée. Redirection...";
+                setTimeout(() => window.location.href = 'admin.html', 1000);
+            }
+        });
+    </script>
+</body>
+</html>
