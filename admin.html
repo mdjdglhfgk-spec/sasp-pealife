@@ -1,171 +1,230 @@
-import { supabase } from './supabase.js';
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>SASP — Centre de Commandement</title>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="img/badge-sasp.png">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="admin-body">
 
-document.body.style.visibility = 'hidden';
-document.body.style.opacity = '0';
+    <!-- ÉCRAN DE CHARGEMENT -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="spinner"></div>
+        <h2>Vérification des accès...</h2>
+    </div>
 
-let allPages = [];
+    <!-- DASHBOARD -->
+    <div class="admin-dashboard" id="adminDashboard" style="display: none;">
+        
+        <!-- SIDEBAR -->
+        <aside class="admin-sidebar">
+            <div class="admin-brand">
+                <img src="img/badge-sasp.png" alt="SASP">
+                <div>
+                    <h1>Command Center</h1>
+                    <span>SASP Intranet</span>
+                </div>
+            </div>
+            <nav class="admin-nav">
+                <a href="#" class="active">Gestion du contenu</a>
+                <a href="index.html" target="_blank">Voir le site public</a>
+                <a href="agents.html" target="_blank">Voir le registre</a>
+            </nav>
+            <button id="logoutBtn" class="btn btn-outline" style="margin-top: auto;">Déconnexion</button>
+        </aside>
 
-async function checkAuth() {
-    try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        if (error || !session) {
-            window.location.replace('login.html');
-            return false;
-        }
-        document.getElementById('loadingScreen').style.display = 'none';
-        document.getElementById('adminDashboard').style.display = 'block';
-        document.body.style.visibility = 'visible';
-        document.body.style.opacity = '1';
-        return true;
-    } catch (err) {
-        window.location.replace('login.html');
-        return false;
-    }
-}
+        <!-- MAIN CONTENT -->
+        <main class="admin-main">
+            <div class="admin-topbar">
+                <h2>Gestion de la faction</h2>
+                <div class="admin-user">
+                    <span class="status-dot"></span> Administrateur connecté
+                </div>
+            </div>
 
-document.addEventListener('DOMContentLoaded', async () => {
-    const isAuth = await checkAuth();
-    if (!isAuth) return; 
+            <!-- SYSTEME D'ONGLETS -->
+            <div class="admin-tabs">
+                <button class="admin-tab-btn active" data-target="tab-pages">📄 Pages du site</button>
+                <button class="admin-tab-btn" data-target="tab-agents">👮 Registre des Agents</button>
+            </div>
 
-    loadPages();
-    loadAgents();
+            <!-- ================= ONGLET PAGES ================= -->
+            <div id="tab-pages" class="admin-tab-content active">
+                <div class="admin-panel">
+                    <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <div>
+                            <h3>Gestion des pages</h3>
+                            <p>Cliquez sur "Modifier" pour éditer une page.</p>
+                        </div>
+                        <!-- Le bouton pour créer une page redirige aussi vers editer.html -->
+                        <a href="editer.html" class="btn btn-primary" style="padding: 10px 20px; text-decoration: none;">+ Nouvelle Page</a>
+                    </div>
 
-    document.getElementById('logoutBtn').addEventListener('click', async () => {
-        await supabase.auth.signOut();
-        window.location.replace('login.html');
-    });
+                    <div class="admin-search-bar">
+                        <input type="text" id="searchInput" placeholder="Rechercher une page par titre...">
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Titre de la page</th>
+                                    <th>URL (Slug)</th>
+                                    <th style="text-align: right;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pagesTableBody">
+                                <tr><td colspan="3" style="text-align: center;">Chargement...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
 
-    document.querySelectorAll('.admin-tab-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.admin-tab-content').forEach(c => c.classList.remove('active'));
-            e.target.classList.add('active');
-            document.getElementById(e.target.getAttribute('data-target')).classList.add('active');
-        });
-    });
+            <!-- ================= ONGLET AGENTS ================= -->
+            <div id="tab-agents" class="admin-tab-content">
+                <div class="admin-panel">
+                    <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <div>
+                            <h3>Registre des Agents</h3>
+                            <p>Gérez les effectifs, grades, divisions et formations.</p>
+                        </div>
+                        <button class="btn btn-primary" id="btnCreateAgent" style="padding: 10px 20px;">+ Nouvel Agent</button>
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Nom Prénom</th>
+                                    <th>Grade</th>
+                                    <th>Division</th>
+                                    <th style="text-align: right;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="agentsTableBody">
+                                <tr><td colspan="4" style="text-align: center;">Chargement...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
 
-    document.getElementById('searchInput').addEventListener('input', (e) => {
-        const term = e.target.value.toLowerCase();
-        const filtered = allPages.filter(p => p.title.toLowerCase().includes(term) || p.slug.toLowerCase().includes(term));
-        renderPagesTable(filtered);
-    });
-});
+        </main>
+    </div>
 
-// ==========================================
-// GESTION DES PAGES (AFFICHAGE SEULEMENT)
-// ==========================================
-async function loadPages() {
-    const { data: pages, error } = await supabase.from('pages').select('*').order('created_at', { ascending: false });
-    if (!error) {
-        allPages = pages || [];
-        renderPagesTable(allPages);
-    }
-}
+    <!-- ========================================== -->
+    <!-- MODALE UNIQUE POUR LES AGENTS              -->
+    <!-- ========================================== -->
+    <div class="modal-overlay" id="agentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="agentModalTitle">Ajouter un Agent</h3>
+                <button class="modal-close" id="btnCloseAgentModal">&times;</button>
+            </div>
+            
+            <div class="modal-body">
+                <form id="agentForm">
+                    <input type="hidden" id="agentId">
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div class="form-group">
+                            <label>Nom Prénom</label>
+                            <input type="text" id="agentNom" required placeholder="Ex: John Doe">
+                        </div>
+                        <div class="form-group">
+                            <label>Matricule</label>
+                            <input type="text" id="agentMatricule" placeholder="Ex: 1024">
+                        </div>
+                    </div>
 
-function renderPagesTable(pagesToRender) {
-    const tbody = document.getElementById('pagesTableBody');
-    if (pagesToRender.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">Aucune page.</td></tr>';
-        return;
-    }
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div class="form-group">
+                            <label>Grade</label>
+                            <select id="agentGrade">
+                                <option value="">Sélectionner un grade...</option>
+                                <option value="Cadet">Cadet</option>
+                                <option value="Officer">Officer</option>
+                                <option value="Officer II">Officer II</option>
+                                <option value="Officer III">Officer III</option>
+                                <option value="Sergeant">Sergeant</option>
+                                <option value="Lieutenant">Lieutenant</option>
+                                <option value="Captain">Captain</option>
+                                <option value="Commander">Commander</option>
+                                <option value="Chief">Chief</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Division Principale</label>
+                            <select id="agentDivision">
+                                <option value="">Sélectionner une division...</option>
+                                <option value="METRO">METRO</option>
+                                <option value="HIGHWAY">HIGHWAY</option>
+                                <option value="K9">K9</option>
+                                <option value="MCD">MCD</option>
+                                <option value="FTO">FTO</option>
+                                <option value="PA">PA</option>
+                            </select>
+                        </div>
+                    </div>
 
-    tbody.innerHTML = '';
-    pagesToRender.forEach(page => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td>${page.title}</td>
-            <td><a href="page.html?slug=${page.slug}" target="_blank" style="color:var(--gold);">/${page.slug}</a></td>
-            <td style="text-align: right;">
-                <!-- Le bouton Modifier redirige maintenant vers editer.html -->
-                <a href="editer.html?id=${page.id}" class="btn-sm btn-edit" style="text-decoration: none; display: inline-block;">Modifier</a>
-                <button class="btn-sm btn-delete" onclick="deletePage('${page.id}')">Supprimer</button>
-            </td>
-        `;
-        tbody.appendChild(tr);
-    });
-}
+                    <!-- SUPERVISEUR -->
+                    <div class="form-group" style="display: flex; align-items: center; gap: 10px; background: rgba(212, 175, 55, 0.1); padding: 15px; border-radius: 6px; border: 1px solid var(--gold);">
+                        <input type="checkbox" id="agentSup" style="width: 20px; height: 20px; cursor: pointer; accent-color: var(--gold);">
+                        <label for="agentSup" style="margin: 0; cursor: pointer; color: var(--gold); font-weight: bold;">Supervisor de Terrain (SUP)</label>
+                    </div>
 
-window.deletePage = async (id) => {
-    if (confirm("Supprimer cette page ?")) {
-        const { error } = await supabase.from('pages').delete().eq('id', id);
-        if (!error) loadPages();
-    }
-};
+                    <!-- FORMATIONS -->
+                    <div class="form-group">
+                        <label>Formations Validées</label>
+                        <div class="tags-input-group">
+                            <select id="selectFormation" style="flex: 1; padding: 8px; background: var(--bg-dark); border: 1px solid var(--border); color: var(--text-main); border-radius: 4px;">
+                                <option value="">Ajouter une formation...</option>
+                                <option value="PA">Formation PA (PA)</option>
+                                <option value="PPA">Formation PPA (PPA)</option>
+                                <option value="PPAL">Formation PPA LOURD (PPAL)</option>
+                                <option value="CDU">Formation conduite urgente (CDU)</option>
+                                <option value="F-T">Formation Tazer (F-T)</option>
+                                <option value="PROC">Formation Procédure (PROC)</option>
+                            </select>
+                            <button type="button" onclick="addTag('formation')">+</button>
+                        </div>
+                        <div class="active-tags" id="listFormations"></div>
+                    </div>
 
-// ==========================================
-// GESTION DES AGENTS (INCHANGÉE)
-// ==========================================
-async function loadAgents() {
-    const tbody = document.getElementById('agentsTableBody');
-    const { data: agents, error } = await supabase.from('agents').select('*').order('nom', { ascending: true });
+                    <!-- SANCTIONS -->
+                    <div class="form-group">
+                        <label>Sanctions</label>
+                        <div class="tags-input-group">
+                            <select id="selectSanction" style="flex: 1; padding: 8px; background: var(--bg-dark); border: 1px solid var(--border); color: var(--text-main); border-radius: 4px;">
+                                <option value="">Ajouter une sanction...</option>
+                                <option value="B1">Blâme 1 (B1)</option>
+                                <option value="B2">Blâme 2 (B2)</option>
+                                <option value="S">Suspendu (S)</option>
+                                <option value="RENV">En cour de renvoi (RENV)</option>
+                            </select>
+                            <button type="button" onclick="addTag('sanction')">+</button>
+                        </div>
+                        <div class="active-tags" id="listSanctions"></div>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="btnCancelAgentModal">Annuler</button>
+                <button class="btn btn-primary" id="submitAgentBtn" form="agentForm" type="submit">Enregistrer</button>
+            </div>
+        </div>
+    </div>
 
-    if (error || !agents || agents.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Aucun agent.</td></tr>';
-        return;
-    }
+    <!-- NOTIFICATION TOAST -->
+    <div class="toast-notification" id="toast">
+        <span id="toastMessage">Opération réussie !</span>
+    </div>
 
-    tbody.innerHTML = '';
-    agents.forEach(agent => {
-        const tr = document.createElement('tr');
-        const supBadge = agent.est_superviseur ? ' <span class="agent-badge" style="background:var(--gold); color:var(--bg-dark); font-weight:bold; margin-left:5px; font-size:0.7rem;">SUP</span>' : '';
-        tr.innerHTML = `
-            <td>${agent.nom}${supBadge}</td>
-            <td><span class="agent-badge grade">${agent.grade || '-'}</span></td>
-            <td>${agent.division || '-'}</td>
-            <td style="text-align: right;">
-                <button class="btn-sm btn-edit" onclick="editAgent('${agent.id}')">Modifier</button>
-                <button class="btn-sm btn-delete" onclick="deleteAgent('${agent.id}')">Supprimer</button>
-            </td>
-        `;
-        tbody.appendChild(tr);
-    });
-}
-
-window.editAgent = async (id) => {
-    // (Le code d'édition des agents via la modale reste inchangé car il fonctionnait)
-    const { data: agent } = await supabase.from('agents').select('*').eq('id', id).single();
-    if (!agent) return;
-
-    document.getElementById('agentId').value = agent.id;
-    document.getElementById('agentNom').value = agent.nom;
-    document.getElementById('agentMatricule').value = agent.matricule || '';
-    document.getElementById('agentGrade').value = agent.grade || '';
-    document.getElementById('agentDivision').value = agent.division || '';
-    document.getElementById('agentSup').checked = agent.est_superviseur || false;
-    
-    currentFormations = agent.formations || [];
-    currentSanctions = agent.sanctions || [];
-    renderTags();
-    
-    document.getElementById('agentModalTitle').textContent = "Modifier l'Agent";
-    document.getElementById('agentModal').classList.add('active');
-};
-
-window.deleteAgent = async (id) => {
-    if (confirm("Supprimer cet agent ?")) {
-        const { error } = await supabase.from('agents').delete().eq('id', id);
-        if (!error) loadAgents();
-    }
-};
-
-// OUTILS POUR LES AGENTS
-function renderTags() {
-    document.getElementById('listFormations').innerHTML = currentFormations.map((f, i) => `<div class="active-tag">${f} <span onclick="removeTag('formation', ${i})">×</span></div>`).join('');
-    document.getElementById('listSanctions').innerHTML = currentSanctions.map((s, i) => `<div class="active-tag">${s} <span onclick="removeTag('sanction', ${i})">×</span></div>`).join('');
-}
-
-window.addTag = (type) => {
-    const select = document.getElementById(type === 'formation' ? 'selectFormation' : 'selectSanction');
-    const val = select.value;
-    if (!val) return;
-    if (type === 'formation' && !currentFormations.includes(val)) currentFormations.push(val);
-    else if (type === 'sanction' && !currentSanctions.includes(val)) currentSanctions.push(val);
-    select.value = '';
-    renderTags();
-};
-
-window.removeTag = (type, index) => {
-    if (type === 'formation') currentFormations.splice(index, 1);
-    else currentSanctions.splice(index, 1);
-    renderTags();
-};
+    <!-- SCRIPT -->
+    <script type="module" src="js/admin.js"></script>
+</body>
+</html>
