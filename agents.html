@@ -6,40 +6,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="img/badge-sasp.png">
     <link rel="stylesheet" href="css/style.css">
-    <style>
-        /* Styles spécifiques à cette page pour garantir un affichage parfait */
-        .page-header-action {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 40px;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
-        .search-input-wrapper {
-            position: relative;
-            width: 100%;
-            max-width: 400px;
-        }
-        .search-input-wrapper input {
-            width: 100%;
-            padding: 15px 20px;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            color: var(--text-main);
-            border-radius: 8px;
-            font-size: 1rem;
-            outline: none;
-            transition: border-color 0.3s;
-        }
-        .search-input-wrapper input:focus {
-            border-color: var(--gold);
-        }
-    </style>
 </head>
 <body>
 
-    <!-- NAVIGATION -->
     <header class="navbar scrolled">
         <div class="nav-container">
             <a href="index.html" class="nav-brand">
@@ -57,7 +26,6 @@
         </div>
     </header>
 
-    <!-- HERO INTERNE -->
     <section class="hero-inner">
         <div class="hero-inner-content">
             <div class="hero-tag"><span class="tag-line"></span> Effectif Officiel</div>
@@ -66,25 +34,17 @@
         </div>
     </section>
 
-    <!-- CONTENU PRINCIPAL -->
     <main class="main-content">
-        
-        <!-- En-tête avec Titre et Recherche -->
-        <div class="page-header-action">
-            <h2 style="font-family: var(--font-heading); font-size: 2rem; color: var(--text-main);">Nos effectifs</h2>
-            <div class="search-input-wrapper">
-                <input type="text" id="searchAgent" placeholder="Rechercher un agent (Nom, Matricule, Division)...">
-            </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 15px;">
+            <h2 style="font-family: var(--font-heading); font-size: 1.8rem; color: var(--text-main);">Nos effectifs</h2>
+            <input type="text" id="searchAgent" placeholder="Rechercher un agent..." style="padding: 12px; background: var(--surface); border: 1px solid var(--border); color: var(--text-main); border-radius: 4px; width: 350px; max-width: 100%;">
         </div>
 
-        <!-- Grille des agents -->
         <div class="agents-grid" id="agentsList">
-            <p style="color: var(--text-muted); grid-column: 1 / -1; text-align: center; padding: 40px;">Chargement du registre...</p>
+            <p style="color: var(--text-muted); grid-column: 1 / -1;">Chargement...</p>
         </div>
-
     </main>
 
-    <!-- FOOTER -->
     <footer class="footer">
         <div class="footer-container">
             <div class="footer-bottom">
@@ -94,79 +54,66 @@
         </div>
     </footer>
 
-    <!-- SCRIPT -->
-        <script type="module">
+    <script type="module">
         import { supabase } from './js/supabase.js';
 
         let allAgents = [];
 
         async function fetchAgents() {
             const container = document.getElementById('agentsList');
-            
-            // On récupère les données
-            const { data: agents, error } = await supabase
-                .from('agents')
-                .select('*')
-                .order('nom', { ascending: true });
+            const { data: agents, error } = await supabase.from('agents').select('*').order('nom', { ascending: true });
 
-            if (error) {
-                container.innerHTML = `<h2 style="color:red; grid-column: 1/-1;">ERREUR SUPABASE : ${error.message}</h2>`;
+            if (error || !agents || agents.length === 0) {
+                container.innerHTML = `<p style="color: var(--text-muted); text-align: center; grid-column: 1 / -1; padding: 40px;">Aucun agent enregistré.</p>`;
                 return;
             }
-
-            if (!agents || agents.length === 0) {
-                container.innerHTML = `<h2 style="color:white; grid-column: 1/-1;">Aucun agent trouvé dans la base.</h2>`;
-                return;
-            }
-
-            // --- TEST DE DÉBOGAGE ---
-            // On prend le premier agent pour voir ce qu'il a dans le ventre
-            const agentTest = agents[0];
-            
-            let debugHtml = `
-                <div style="grid-column: 1/-1; background: #222; border: 2px solid var(--gold); padding: 20px; margin-bottom: 20px; border-radius: 8px;">
-                    <h3 style="color: var(--gold); margin-bottom: 10px;">🛠️ DÉBOGAGE DE L'AGENT : ${agentTest.nom}</h3>
-                    <p style="color: white;"><strong>Sanctions (Données brutes) :</strong> ${JSON.stringify(agentTest.sanctions)}</p>
-                    <p style="color: white;"><strong>Formations (Données brutes) :</strong> ${JSON.stringify(agentTest.formations)}</p>
-                    <p style="color: white;"><strong>Divisions (Données brutes) :</strong> ${JSON.stringify(agentTest.division)}</p>
-                </div>
-            `;
-            
-            container.innerHTML = debugHtml;
-
-            // On affiche tous les agents normalement en dessous
             allAgents = agents;
             renderAgents(allAgents);
         }
 
         function renderAgents(agentsToRender) {
             const container = document.getElementById('agentsList');
+            container.innerHTML = '';
+
+            if (agentsToRender.length === 0) {
+                container.innerHTML = `<p style="color: var(--text-muted); text-align: center; grid-column: 1 / -1; padding: 40px;">Aucun agent trouvé.</p>`;
+                return;
+            }
 
             agentsToRender.forEach(agent => {
                 const supBadge = agent.est_superviseur ? ' <span class="agent-badge" style="background:var(--gold); color:var(--bg-dark); font-weight:bold; margin-left:5px;">SUP</span>' : '';
 
+                // Formations
                 const formationsHtml = agent.formations && agent.formations.length > 0 
                     ? agent.formations.map(f => `<span class="tag">${f}</span>`).join('') 
                     : '<span style="font-size:0.8rem; color:var(--text-muted);">Aucune</span>';
 
-                // Vérification stricte des sanctions
+                // Spécialisations
+                const specsHtml = agent.specialisations && agent.specialisations.length > 0 
+                    ? agent.specialisations.map(s => `<span class="agent-badge" style="border-color:#a855f7; color:#a855f7;">${s}</span>`).join(' ')
+                    : '';
+
+                // SANCTIONS (Design premium)
                 let sanctionsHtml = '';
-                if (agent.sanctions) {
-                    if (Array.isArray(agent.sanctions) && agent.sanctions.length > 0) {
-                        sanctionsHtml = agent.sanctions.map(s => `<span class="agent-badge sanction">${s}</span>`).join('');
-                    } else if (typeof agent.sanctions === 'string' && agent.sanctions.length > 0) {
-                        // Si c'est enregistré comme du texte au lieu d'un tableau
-                        sanctionsHtml = `<span class="agent-badge sanction">${agent.sanctions}</span>`;
-                    }
+                if (agent.sanctions && agent.sanctions.length > 0) {
+                    const badges = agent.sanctions.map(s => `<span class="sanction-badge">${s}</span>`).join('');
+                    sanctionsHtml = `
+                        <div class="sanction-alert">
+                            <div class="sanction-icon">⚠️</div>
+                            <div class="sanction-content">
+                                <div class="sanction-title">Sanctions en cours</div>
+                                <div class="sanction-list">${badges}</div>
+                            </div>
+                        </div>
+                    `;
                 }
 
-                let divisionsHtml = '<span class="agent-badge">Aucune division</span>';
+                // Divisions
+                let divisionsHtml = '<span class="agent-badge">Aucune</span>';
                 if (agent.division) {
-                    if (Array.isArray(agent.division)) {
-                        divisionsHtml = agent.division.map(d => `<span class="agent-badge">${d}</span>`).join(' ');
-                    } else {
-                        divisionsHtml = `<span class="agent-badge">${agent.division}</span>`;
-                    }
+                    divisionsHtml = Array.isArray(agent.division) 
+                        ? agent.division.map(d => `<span class="agent-badge">${d}</span>`).join(' ')
+                        : `<span class="agent-badge">${agent.division}</span>`;
                 }
 
                 const card = document.createElement('div');
@@ -183,14 +130,10 @@
                     <div class="agent-info-row" style="margin-bottom: 15px;">
                         <span class="agent-badge grade">${agent.grade || 'Sans grade'}</span>
                         ${divisionsHtml}
+                        ${specsHtml}
                     </div>
 
-                    <!-- SANCTIONS -->
-                    ${sanctionsHtml ? `
-                    <div style="background: rgba(239, 68, 68, 0.2); border-left: 4px solid #ef4444; padding: 10px 15px; margin-bottom: 15px; border-radius: 4px;">
-                        <div style="font-size: 0.75rem; color: #ef4444; text-transform: uppercase; font-weight: bold; margin-bottom: 5px;">⚠️ Sanctions en cours</div>
-                        <div class="agent-info-row">${sanctionsHtml}</div>
-                    </div>` : ''}
+                    ${sanctionsHtml}
 
                     <div style="margin-top: 15px;">
                         <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Formations Validées</div>
@@ -200,6 +143,17 @@
                 container.appendChild(card);
             });
         }
+
+        document.getElementById('searchAgent').addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            const filtered = allAgents.filter(a => {
+                const matchNom = a.nom.toLowerCase().includes(term);
+                const matchMatricule = a.matricule && a.matricule.includes(term);
+                const matchDiv = a.division && (Array.isArray(a.division) ? a.division.some(d => d.toLowerCase().includes(term)) : a.division.toLowerCase().includes(term));
+                return matchNom || matchMatricule || matchDiv;
+            });
+            renderAgents(filtered);
+        });
 
         fetchAgents();
     </script>
