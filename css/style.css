@@ -1406,3 +1406,38 @@ button {
     color: var(--error);
     font-weight: bold;
 }
+/* --- PASTILLES DE DIVISIONS --- */
+.division-pill-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 5px;
+}
+
+.division-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: var(--bg-dark);
+    border: 1px solid var(--border);
+    border-radius: 30px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.division-pill input {
+    display: none; /* On cache la vraie case à cocher */
+}
+
+/* Effet quand la pastille est cochée */
+.division-pill:has(input:checked) {
+    background: rgba(212, 175, 55, 0.15);
+    border-color: var(--gold);
+    color: var(--gold);
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
+}
