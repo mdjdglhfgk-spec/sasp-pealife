@@ -58,7 +58,6 @@
                             <h3>Gestion des pages</h3>
                             <p>Cliquez sur "Modifier" pour éditer une page.</p>
                         </div>
-                        <!-- Le bouton pour créer une page redirige vers editer.html -->
                         <a href="editer.html" class="btn btn-primary" style="padding: 10px 20px; text-decoration: none;">+ Nouvelle Page</a>
                     </div>
 
@@ -101,7 +100,7 @@
                                     <th>Nom Prénom</th>
                                     <th>Grade</th>
                                     <th>Division</th>
-                                    <th>Sanctions</th> <!-- LA COLONNE SANCTIONS EST ICI -->
+                                    <th>Sanctions</th>
                                     <th style="text-align: right;">Actions</th>
                                 </tr>
                             </thead>
@@ -130,7 +129,6 @@
                 <form id="agentForm">
                     <input type="hidden" id="agentId">
                     
-                    <!-- NOM & MATRICULE -->
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                         <div class="form-group">
                             <label>Nom Prénom</label>
@@ -142,7 +140,6 @@
                         </div>
                     </div>
 
-                    <!-- GRADE -->
                     <div class="form-group">
                         <label>Grade</label>
                         <select id="agentGrade">
@@ -159,7 +156,6 @@
                         </select>
                     </div>
 
-                    <!-- DIVISIONS MULTIPLES (Pastilles) -->
                     <div class="form-group">
                         <label>Divisions (Sélection multiple)</label>
                         <div class="division-pill-group">
@@ -172,7 +168,6 @@
                         </div>
                     </div>
 
-                    <!-- SPÉCIALISATIONS (Pastilles violettes) -->
                     <div class="form-group">
                         <label>Spécialisations</label>
                         <div class="division-pill-group">
@@ -184,13 +179,11 @@
                         </div>
                     </div>
 
-                    <!-- SUPERVISEUR -->
                     <div class="form-group" style="display: flex; align-items: center; gap: 10px; background: rgba(212, 175, 55, 0.1); padding: 15px; border-radius: 6px; border: 1px solid var(--gold); margin-top: 20px;">
                         <input type="checkbox" id="agentSup" style="width: 20px; height: 20px; cursor: pointer; accent-color: var(--gold);">
                         <label for="agentSup" style="margin: 0; cursor: pointer; color: var(--gold); font-weight: bold;">Supervisor de Terrain (SUP)</label>
                     </div>
 
-                    <!-- FORMATIONS -->
                     <div class="form-group">
                         <label>Formations Validées</label>
                         <div class="tags-input-group">
@@ -208,7 +201,6 @@
                         <div class="active-tags" id="listFormations"></div>
                     </div>
 
-                    <!-- SANCTIONS -->
                     <div class="form-group">
                         <label>Sanctions</label>
                         <div class="tags-input-group">
