@@ -1,30 +1,24 @@
 import { supabase } from './supabase.js';
 
-console.log("Script Admin chargé.");
-
+// --- SÉCURITÉ ---
 document.body.style.visibility = 'hidden';
 document.body.style.opacity = '0';
 
-// Déclarations globales
 let allPages = [];
-const modal = document.getElementById('editorModal');
-const editor = document.getElementById('editorContent');
+let currentFormations = [];
+let currentSanctions = [];
 
 async function checkAuth() {
     try {
         const { data: { session }, error } = await supabase.auth.getSession();
-
-        // On vérifie si on vient du login (sécurité)
         const isFromLogin = document.referrer.includes('login.html');
 
         if (error || !session || !isFromLogin) {
-            console.log("Accès refusé : pas de session ou pas de login.");
             await supabase.auth.signOut();
             window.location.replace('login.html');
             return false;
         }
 
-        console.log("Accès autorisé.");
         document.getElementById('loadingScreen').style.display = 'none';
         document.getElementById('adminDashboard').style.display = 'block';
         document.body.style.visibility = 'visible';
@@ -32,17 +26,18 @@ async function checkAuth() {
         document.body.style.opacity = '1';
         return true;
     } catch (err) {
-        console.error("Erreur Auth:", err);
         window.location.replace('login.html');
         return false;
     }
 }
 
+// --- INITIALISATION ---
 document.addEventListener('DOMContentLoaded', async () => {
     const isAuth = await checkAuth();
-    if (!isAuth) return;
+    if (!isAuth) return; 
 
     loadPages();
+    loadAgents(); // Charge les agents en arrière-plan
 
     // Déconnexion
     document.getElementById('logoutBtn').addEventListener('click', async () => {
@@ -51,93 +46,130 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.location.replace('login.html');
     });
 
-    // Créer
+    // --- ONGLETS ---
+    document.querySelectorAll('.admin-tab-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.admin-tab-content').forEach(c => c.classList.remove('active'));
+            
+            e.target.classList.add('active');
+            document.getElementById(e.target.getAttribute('data-target')).classList.add('active');
+        });
+    });
+
+    // ==========================================
+    // LOGIQUE PAGES
+    // ==========================================
     document.getElementById('btnCreateNew').addEventListener('click', () => {
         document.getElementById('pageForm').reset();
-        editor.innerHTML = '';
+        document.getElementById('editorContent').innerHTML = '';
         document.getElementById('pageId').value = '';
         document.getElementById('modalTitle').textContent = "Créer une nouvelle page";
-        document.getElementById('submitBtn').textContent = "Publier la page";
-        openModal();
+        document.getElementById('editorModal').classList.add('active');
     });
 
-    // Fermer
-    document.getElementById('btnCloseModal').addEventListener('click', closeModal);
-    document.getElementById('btnCancelModal').addEventListener('click', closeModal);
+    document.getElementById('btnCloseModal').addEventListener('click', () => document.getElementById('editorModal').classList.remove('active'));
+    document.getElementById('btnCancelModal').addEventListener('click', () => document.getElementById('editorModal').classList.remove('active'));
 
-    // Recherche
     document.getElementById('searchInput').addEventListener('input', (e) => {
         const term = e.target.value.toLowerCase();
-        const filtered = allPages.filter(p =>
-            p.title.toLowerCase().includes(term) || p.slug.toLowerCase().includes(term)
-        );
-        renderTable(filtered);
+        const filtered = allPages.filter(p => p.title.toLowerCase().includes(term) || p.slug.toLowerCase().includes(term));
+        renderPagesTable(filtered);
     });
 
-    // Sauvegarde
     document.getElementById('pageForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-
         const id = document.getElementById('pageId').value;
-        const submitBtn = document.getElementById('submitBtn');
-
+        const btn = document.getElementById('submitBtn');
         const pageData = {
             title: document.getElementById('pageTitle').value,
             slug: document.getElementById('pageSlug').value,
-            content: editor.innerHTML
+            content: document.getElementById('editorContent').innerHTML 
         };
 
-        submitBtn.textContent = "Enregistrement...";
-        submitBtn.disabled = true;
+        btn.textContent = "Enregistrement...";
+        btn.disabled = true;
 
         let error;
-        try {
-            if (id) {
-                console.log("Modification de la page...");
-                const { error: err } = await supabase.from('pages').update(pageData).eq('id', id);
-                error = err;
-            } else {
-                console.log("Création de la page...");
-                const { error: err } = await supabase.from('pages').insert([pageData]);
-                error = err;
-            }
-        } catch (err) {
+        if (id) {
+            const { error: err } = await supabase.from('pages').update(pageData).eq('id', id);
+            error = err;
+        } else {
+            const { error: err } = await supabase.from('pages').insert([pageData]);
             error = err;
         }
 
-        if (error) {
-            console.error("Erreur DB:", error);
-            alert("Erreur : " + error.message);
-            submitBtn.textContent = "Enregistrer";
-            submitBtn.disabled = false;
-        } else {
-            console.log("Sauvegarde réussie.");
-            closeModal();
-            showToast("Page enregistrée avec succès !");
+        btn.textContent = "Enregistrer";
+        btn.disabled = false;
+
+        if (error) alert("Erreur : " + error.message);
+        else {
+            document.getElementById('editorModal').classList.remove('active');
+            showToast("Page enregistrée !");
             loadPages();
+        }
+    });
+
+    // ==========================================
+    // LOGIQUE AGENTS
+    // ==========================================
+    document.getElementById('btnCreateAgent').addEventListener('click', () => {
+        document.getElementById('agentForm').reset();
+        document.getElementById('agentId').value = '';
+        currentFormations = [];
+        currentSanctions = [];
+        renderTags();
+        document.getElementById('agentModalTitle').textContent = "Ajouter un Agent";
+        document.getElementById('agentModal').classList.add('active');
+    });
+
+    document.getElementById('btnCloseAgentModal').addEventListener('click', () => document.getElementById('agentModal').classList.remove('active'));
+    document.getElementById('btnCancelAgentModal').addEventListener('click', () => document.getElementById('agentModal').classList.remove('active'));
+
+    document.getElementById('agentForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const id = document.getElementById('agentId').value;
+        const btn = document.getElementById('submitAgentBtn');
+        
+        const agentData = {
+            nom: document.getElementById('agentNom').value,
+            matricule: document.getElementById('agentMatricule').value,
+            grade: document.getElementById('agentGrade').value,
+            division: document.getElementById('agentDivision').value,
+            formations: currentFormations,
+            sanctions: currentSanctions
+        };
+
+        btn.textContent = "Enregistrement...";
+        btn.disabled = true;
+
+        let error;
+        if (id) {
+            const { error: err } = await supabase.from('agents').update(agentData).eq('id', id);
+            error = err;
+        } else {
+            const { error: err } = await supabase.from('agents').insert([agentData]);
+            error = err;
+        }
+
+        btn.textContent = "Enregistrer";
+        btn.disabled = false;
+
+        if (error) alert("Erreur Supabase : " + error.message);
+        else {
+            document.getElementById('agentModal').classList.remove('active');
+            showToast("Agent enregistré !");
+            loadAgents();
         }
     });
 });
 
-// Outils d'édition visuelle
+// --- OUTILS ---
 window.formatDoc = (command, value = null) => {
     document.execCommand(command, false, value);
-    editor.focus();
+    document.getElementById('editorContent').focus();
 };
 
-// Modale
-function openModal() {
-    modal.classList.add('active');
-    document.body.style.overflow = 'hidden';
-}
-function closeModal() {
-    modal.classList.remove('active');
-    document.body.style.overflow = 'auto';
-    document.getElementById('pageForm').reset();
-    editor.innerHTML = '';
-}
-
-// Notification
 function showToast(message) {
     const toast = document.getElementById('toast');
     document.getElementById('toastMessage').textContent = message;
@@ -145,81 +177,121 @@ function showToast(message) {
     setTimeout(() => toast.classList.remove('show'), 3000);
 }
 
-// Chargement
+window.addTag = (type) => {
+    const input = document.getElementById(type === 'formation' ? 'inputFormation' : 'inputSanction');
+    const val = input.value.trim();
+    if (!val) return;
+
+    if (type === 'formation' && !currentFormations.includes(val)) currentFormations.push(val);
+    else if (type === 'sanction' && !currentSanctions.includes(val)) currentSanctions.push(val);
+    
+    input.value = '';
+    renderTags();
+};
+
+window.removeTag = (type, index) => {
+    if (type === 'formation') currentFormations.splice(index, 1);
+    else currentSanctions.splice(index, 1);
+    renderTags();
+};
+
+function renderTags() {
+    document.getElementById('listFormations').innerHTML = currentFormations.map((f, i) => `<div class="active-tag">${f} <span onclick="removeTag('formation', ${i})">×</span></div>`).join('');
+    document.getElementById('listSanctions').innerHTML = currentSanctions.map((s, i) => `<div class="active-tag">${s} <span onclick="removeTag('sanction', ${i})">×</span></div>`).join('');
+}
+
+// --- CHARGEMENT DES DONNÉES ---
 async function loadPages() {
-    const tbody = document.getElementById('pagesTableBody');
-    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--text-muted);">Chargement...</td></tr>';
-
-    try {
-        const { data: pages, error } = await supabase.from('pages').select('*').order('created_at', { ascending: false });
-
-        if (error) throw error;
-
+    const { data: pages, error } = await supabase.from('pages').select('*').order('created_at', { ascending: false });
+    if (!error) {
         allPages = pages || [];
-        renderTable(allPages);
-    } catch (err) {
-        console.error("Erreur chargement:", err);
-        tbody.innerHTML = `<tr><td colspan="3" style="color:var(--error); text-align:center;">Erreur: ${err.message}</td></tr>`;
+        renderPagesTable(allPages);
     }
 }
 
-function renderTable(pagesToRender) {
+function renderPagesTable(pagesToRender) {
     const tbody = document.getElementById('pagesTableBody');
-
     if (pagesToRender.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--text-muted);">Aucune page trouvée.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">Aucune page.</td></tr>';
         return;
     }
 
     tbody.innerHTML = '';
     pagesToRender.forEach(page => {
         const tr = document.createElement('tr');
-
-        // On encode pour éviter les bugs avec les guillemets dans le HTML
-        const safeTitle = encodeURIComponent(page.title);
-        const safeContent = encodeURIComponent(page.content);
-
         tr.innerHTML = `
-            <td style="font-weight: 500;">${page.title}</td>
+            <td>${page.title}</td>
             <td><a href="page.html?slug=${page.slug}" target="_blank" style="color:var(--gold);">/${page.slug}</a></td>
             <td style="text-align: right;">
-                <button class="btn-sm btn-edit" data-id="${page.id}" data-title="${safeTitle}" data-slug="${page.slug}" data-content="${safeContent}">Modifier</button>
-                <button class="btn-sm btn-delete" data-id="${page.id}">Supprimer</button>
+                <button class="btn-sm btn-edit" onclick="editPage('${page.id}', '${encodeURIComponent(page.title)}', '${page.slug}', '${encodeURIComponent(page.content)}')">Modifier</button>
+                <button class="btn-sm btn-delete" onclick="deletePage('${page.id}')">Supprimer</button>
             </td>
         `;
         tbody.appendChild(tr);
     });
+}
 
-    document.querySelectorAll('.btn-edit').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const id = e.target.getAttribute('data-id');
-            const title = decodeURIComponent(e.target.getAttribute('data-title'));
-            const slug = e.target.getAttribute('data-slug');
-            const content = decodeURIComponent(e.target.getAttribute('data-content'));
+window.editPage = (id, title, slug, content) => {
+    document.getElementById('pageId').value = id;
+    document.getElementById('pageTitle').value = decodeURIComponent(title);
+    document.getElementById('pageSlug').value = slug;
+    document.getElementById('editorContent').innerHTML = decodeURIComponent(content);
+    document.getElementById('modalTitle').textContent = "Modifier la page";
+    document.getElementById('editorModal').classList.add('active');
+};
 
-            document.getElementById('pageId').value = id;
-            document.getElementById('pageTitle').value = title;
-            document.getElementById('pageSlug').value = slug;
-            editor.innerHTML = content;
+window.deletePage = async (id) => {
+    if (confirm("Supprimer cette page ?")) {
+        const { error } = await supabase.from('pages').delete().eq('id', id);
+        if (!error) loadPages();
+    }
+};
 
-            document.getElementById('modalTitle').textContent = "Modifier la page";
-            document.getElementById('submitBtn').textContent = "Enregistrer les modifications";
+async function loadAgents() {
+    const tbody = document.getElementById('agentsTableBody');
+    const { data: agents, error } = await supabase.from('agents').select('*').order('nom', { ascending: true });
 
-            openModal();
-        });
-    });
+    if (error || !agents || agents.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Aucun agent.</td></tr>';
+        return;
+    }
 
-    document.querySelectorAll('.btn-delete').forEach(btn => {
-        btn.addEventListener('click', async (e) => {
-            const id = e.target.getAttribute('data-id');
-            if (confirm("⚠️ Supprimer définitivement cette page ?")) {
-                const { error } = await supabase.from('pages').delete().eq('id', id);
-                if (error) alert("Erreur : " + error.message);
-                else {
-                    showToast("Page supprimée.");
-                    loadPages();
-                }
-            }
-        });
+    tbody.innerHTML = '';
+    agents.forEach(agent => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${agent.nom}</td>
+            <td><span class="agent-badge grade">${agent.grade || '-'}</span></td>
+            <td>${agent.division || '-'}</td>
+            <td style="text-align: right;">
+                <button class="btn-sm btn-edit" onclick="editAgent('${agent.id}')">Modifier</button>
+                <button class="btn-sm btn-delete" onclick="deleteAgent('${agent.id}')">Supprimer</button>
+            </td>
+        `;
+        tbody.appendChild(tr);
     });
 }
+
+window.editAgent = async (id) => {
+    const { data: agent } = await supabase.from('agents').select('*').eq('id', id).single();
+    if (!agent) return;
+
+    document.getElementById('agentId').value = agent.id;
+    document.getElementById('agentNom').value = agent.nom;
+    document.getElementById('agentMatricule').value = agent.matricule || '';
+    document.getElementById('agentGrade').value = agent.grade || '';
+    document.getElementById('agentDivision').value = agent.division || '';
+    currentFormations = agent.formations || [];
+    currentSanctions = agent.sanctions || [];
+    renderTags();
+    
+    document.getElementById('agentModalTitle').textContent = "Modifier l'Agent";
+    document.getElementById('agentModal').classList.add('active');
+};
+
+window.deleteAgent = async (id) => {
+    if (confirm("Supprimer cet agent ?")) {
+        const { error } = await supabase.from('agents').delete().eq('id', id);
+        if (!error) loadAgents();
+    }
+};
