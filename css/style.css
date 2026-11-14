@@ -1510,78 +1510,54 @@ button {
 #searchAgent:focus { border-color: var(--gold); }
 
 /* ============================================================
-   SANCTIONS MASSIVES & PREMIUM
+   SANCTIONS (Style premium, compact et élégant)
    ============================================================ */
 .sanction-alert {
     display: flex;
     align-items: center;
-    background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(239, 68, 68, 0.05) 100%);
-    border: 1px solid rgba(239, 68, 68, 0.4);
-    border-left: 6px solid #ef4444;
-    border-radius: 8px;
-    overflow: hidden;
-    margin: 20px 0;
-    box-shadow: 0 4px 20px rgba(239, 68, 68, 0.15);
-    position: relative;
-}
-
-.sanction-alert::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: radial-gradient(circle at 0% 50%, rgba(239, 68, 68, 0.2), transparent 70%);
-    pointer-events: none;
+    background: var(--bg-dark);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-left: 3px solid #ef4444;
+    border-radius: 6px;
+    margin: 15px 0;
+    padding: 8px 12px;
+    gap: 12px;
 }
 
 .sanction-icon {
-    background: #ef4444;
-    color: white;
+    color: #ef4444;
+    font-size: 1.2rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.8rem;
-    padding: 0 20px;
-    height: 100%;
-    min-height: 70px;
-    box-shadow: 4px 0 15px rgba(239, 68, 68, 0.3);
-    z-index: 1;
 }
 
 .sanction-content {
-    padding: 15px 20px;
-    flex: 1;
-    z-index: 1;
-}
-
-.sanction-title {
-    font-family: var(--font-heading);
-    font-size: 1.1rem;
-    color: #ef4444;
-    text-transform: uppercase;
-    font-weight: 800;
-    letter-spacing: 2px;
-    margin-bottom: 8px;
-    text-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
-}
-
-.sanction-list {
     display: flex;
+    align-items: center;
     flex-wrap: wrap;
     gap: 10px;
 }
 
+.sanction-title {
+    font-size: 0.75rem;
+    color: #ef4444;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin: 0;
+}
+
 .sanction-badge {
-    background: #ef4444;
-    color: #ffffff;
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
     font-family: var(--font-heading);
     font-weight: 700;
-    font-size: 1.1rem;
-    padding: 6px 16px;
-    border-radius: 6px;
+    font-size: 0.9rem;
+    padding: 2px 10px;
+    border-radius: 4px;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    box-shadow: 0 4px 10px rgba(239, 68, 68, 0.4), inset 0 1px 0 rgba(255,255,255,0.2);
-    border: 1px solid #dc2626;
+    border: 1px solid rgba(239, 68, 68, 0.4);
 }
 /* Pastille pour les spécialisations dans l'admin */
 .spec-pill input:checked + span {
