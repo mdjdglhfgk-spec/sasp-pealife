@@ -22,7 +22,7 @@
             <nav class="nav-links">
                 <a href="index.html" class="nav-link">Accueil</a>
                 <a href="agents.html" class="nav-link active">Registre des Agents</a>
-                <a href="index.html#admin-access" class="nav-link" style="color: var(--gold);">Accès Staff</a>
+                <a href="login.html" class="nav-link" style="color: var(--gold);">Accès Staff</a>
             </nav>
         </div>
     </header>
@@ -42,12 +42,13 @@
     <!-- CONTENU -->
     <main class="main-content">
         
-        <!-- Barre de recherche/filtre simple -->
+        <!-- Barre de recherche -->
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 15px;">
             <h2 style="font-family: var(--font-heading); font-size: 1.8rem; color: var(--text-main);">Nos effectifs</h2>
-            <input type="text" id="searchAgent" placeholder="Rechercher un agent..." style="padding: 12px; background: var(--surface); border: 1px solid var(--border); color: var(--text-main); border-radius: 4px; width: 300px;">
+            <input type="text" id="searchAgent" placeholder="Rechercher un agent (Nom, Matricule, Division)..." style="padding: 12px; background: var(--surface); border: 1px solid var(--border); color: var(--text-main); border-radius: 4px; width: 350px; max-width: 100%;">
         </div>
 
+        <!-- Grille des agents -->
         <div class="agents-grid" id="agentsList">
             <p style="color: var(--text-muted);">Chargement du registre...</p>
         </div>
@@ -64,11 +65,13 @@
         </div>
     </footer>
 
+    <!-- SCRIPT -->
     <script type="module">
         import { supabase } from './js/supabase.js';
 
         let allAgents = [];
 
+        // 1. Charger les agents depuis Supabase
         async function fetchAgents() {
             const container = document.getElementById('agentsList');
             
@@ -86,6 +89,7 @@
             renderAgents(allAgents);
         }
 
+        // 2. Afficher les agents sous forme de cartes
         function renderAgents(agentsToRender) {
             const container = document.getElementById('agentsList');
             container.innerHTML = '';
@@ -111,10 +115,19 @@
                     ? agent.sanctions.map(s => `<span class="agent-badge sanction">${s}</span>`).join('')
                     : '';
 
+                // Gestion des divisions multiples
+                let divisionsHtml = '<span class="agent-badge">Aucune division</span>';
+                if (agent.division) {
+                    if (Array.isArray(agent.division)) {
+                        divisionsHtml = agent.division.map(d => `<span class="agent-badge">${d}</span>`).join(' ');
+                    } else {
+                        divisionsHtml = `<span class="agent-badge">${agent.division}</span>`;
+                    }
+                }
+
                 const card = document.createElement('div');
                 card.className = 'agent-card';
                 
-                // On génère le HTML de la carte
                 card.innerHTML = `
                     <div class="agent-header">
                         <div>
@@ -123,18 +136,18 @@
                         </div>
                     </div>
                     
-                    <div class="agent-info-row">
+                    <div class="agent-info-row" style="margin-bottom: 15px;">
                         <span class="agent-badge grade">${agent.grade || 'Sans grade'}</span>
-                        <span class="agent-badge">${agent.division || 'Aucune division'}</span>
+                        ${divisionsHtml}
                     </div>
 
-                    <div style="margin-top: 20px;">
+                    <div style="margin-top: 15px;">
                         <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Formations Validées</div>
                         <div class="tags-container">${formationsHtml}</div>
                     </div>
 
                     ${sanctionsHtml ? `
-                    <div style="margin-top: 20px; border-top: 1px dashed var(--border); padding-top: 15px;">
+                    <div style="margin-top: 15px; border-top: 1px dashed var(--border); padding-top: 15px;">
                         <div style="font-size: 0.75rem; color: var(--error); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Sanctions en cours</div>
                         <div class="agent-info-row">${sanctionsHtml}</div>
                     </div>` : ''}
@@ -143,14 +156,19 @@
             });
         }
 
-        // Barre de recherche
+        // 3. Barre de recherche
         document.getElementById('searchAgent').addEventListener('input', (e) => {
             const term = e.target.value.toLowerCase();
-            const filtered = allAgents.filter(a => 
-                a.nom.toLowerCase().includes(term) || 
-                (a.matricule && a.matricule.includes(term)) ||
-                (a.division && a.division.toLowerCase().includes(term))
-            );
+            const filtered = allAgents.filter(a => {
+                const matchNom = a.nom.toLowerCase().includes(term);
+                const matchMatricule = a.matricule && a.matricule.includes(term);
+                const matchDiv = a.division && (
+                    Array.isArray(a.division) 
+                        ? a.division.some(d => d.toLowerCase().includes(term)) 
+                        : a.division.toLowerCase().includes(term)
+                );
+                return matchNom || matchMatricule || matchDiv;
+            });
             renderAgents(filtered);
         });
 
