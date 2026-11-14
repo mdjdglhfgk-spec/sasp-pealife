@@ -1565,3 +1565,24 @@ button {
     border-color: #a855f7;
     color: #a855f7;
 }
+
+/* Correction pour que la modale scrolle sur les petits écrans */
+.modal-overlay {
+    padding: 20px; /* Ajoute une marge autour de la modale */
+}
+
+.modal-content {
+    max-height: calc(100vh - 40px); /* Ne dépasse pas la hauteur de l'écran */
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-body {
+    overflow-y: auto; /* Le corps de la modale scrolle */
+    flex: 1;
+}
+
+/* On s'assure que le body redevient normal */
+body {
+    overflow-y: auto;
+}
