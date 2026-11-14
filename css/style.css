@@ -1441,3 +1441,33 @@ button {
     color: var(--gold);
     box-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
 }
+
+/* --- SANCTIONS (VISIBILITÉ MAXIMALE) --- */
+.agent-badge.sanction {
+    background: rgba(239, 68, 68, 0.2); /* Fond rouge transparent */
+    color: #ef4444; /* Texte rouge */
+    border: 1px solid #ef4444; /* Bordure rouge */
+    font-weight: 700; /* Texte en gras */
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 5px 12px;
+    font-size: 0.8rem;
+    display: inline-flex;
+    align-items: center;
+    border-radius: 4px;
+}
+
+/* --- DIVISIONS DANS LE TABLEAU ADMIN --- */
+.div-badge-admin {
+    display: inline-block;
+    background: var(--bg-dark);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-right: 4px;
+    margin-bottom: 4px;
+}
+
