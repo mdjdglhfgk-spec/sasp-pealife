@@ -431,3 +431,39 @@ body.admin-body {
 .table-responsive {
     flex: 1;
 }
+
+/* FORCER LA PAGE À PRENDRE TOUTE LA LARGEUR */
+.admin-dashboard {
+    width: 100%;
+    min-height: 100vh;
+}
+
+.admin-main {
+    flex: 1;
+    width: 100%;
+    max-width: 100%;
+    padding: 40px;
+    box-sizing: border-box;
+}
+
+/* Empêcher le tableau et les stats de s'arrêter à mi-chemin */
+.admin-tab-content {
+    width: 100%;
+}
+
+.admin-panel {
+    width: 100%;
+    max-width: 100%;
+}
+
+.table-responsive {
+    width: 100%;
+}
+
+.stats-grid {
+    width: 100%;
+}
+
+.admin-table {
+    width: 100%;
+}
