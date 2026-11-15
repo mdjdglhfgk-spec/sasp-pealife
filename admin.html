@@ -9,8 +9,8 @@
 </head>
 <body class="admin-body">
 
-    <!-- DASHBOARD -->
-    <div class="admin-dashboard" id="adminDashboard" style="display: none;">
+    <!-- DASHBOARD (Affiché par défaut, plus de cercle) -->
+    <div class="admin-dashboard" id="adminDashboard" style="display: flex;">
         
         <!-- SIDEBAR -->
         <aside class="admin-sidebar">
@@ -104,7 +104,7 @@
         </main>
     </div>
 
-    <!-- MODALE AGENT (Gardée telle quelle) -->
+    <!-- MODALE : GESTION DES AGENTS -->
     <div class="modal-overlay" id="agentModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -114,6 +114,7 @@
             <div class="modal-body">
                 <form id="agentForm">
                     <input type="hidden" id="agentId">
+                    
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                         <div class="form-group">
                             <label>Nom Prénom</label>
@@ -124,6 +125,7 @@
                             <input type="text" id="agentMatricule" placeholder="Ex: 1024">
                         </div>
                     </div>
+
                     <div class="form-group">
                         <label>Grade</label>
                         <select id="agentGrade">
@@ -139,6 +141,7 @@
                             <option value="Capitaine">Capitaine</option>
                         </select>
                     </div>
+
                     <div class="form-group">
                         <label>Divisions</label>
                         <div class="division-pill-group">
@@ -150,10 +153,12 @@
                             <label class="division-pill"><input type="checkbox" value="PA" class="agent-div-checkbox"> PA</label>
                         </div>
                     </div>
+
                     <div class="form-group" style="display: flex; align-items: center; gap: 10px; background: rgba(212, 175, 55, 0.1); padding: 15px; border-radius: 6px; border: 1px solid var(--gold); margin-top: 20px;">
                         <input type="checkbox" id="agentSup" style="width: 20px; height: 20px; cursor: pointer; accent-color: var(--gold);">
                         <label for="agentSup" style="margin: 0; cursor: pointer; color: var(--gold); font-weight: bold;">Supervisor de Terrain (SUP)</label>
                     </div>
+
                     <div class="form-group">
                         <label>Formations Validées</label>
                         <div class="division-pill-group">
@@ -165,6 +170,7 @@
                             <label class="division-pill form-pill"><input type="checkbox" value="PROC" class="agent-form-checkbox"> <span>PROC</span></label>
                         </div>
                     </div>
+
                     <div class="form-group">
                         <label>Sanctions</label>
                         <div class="division-pill-group">
@@ -183,10 +189,12 @@
         </div>
     </div>
 
+    <!-- NOTIFICATION TOAST -->
     <div class="toast-notification" id="toast">
         <span id="toastMessage">Opération réussie !</span>
     </div>
 
+    <!-- SCRIPT -->
     <script type="module" src="js/admin.js"></script>
 </body>
 </html>
