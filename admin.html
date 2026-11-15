@@ -2,19 +2,17 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>SASP — Centre de Commandement</title>
+    <title>SASP — Command Center</title>
     <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="img/badge-sasp.png">
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="admin-body">
 
-    <div id="loadingScreen" class="loading-screen">
-        <div class="spinner"></div>
-        <h2>Vérification des accès...</h2>
-    </div>
-
+    <!-- DASHBOARD -->
     <div class="admin-dashboard" id="adminDashboard" style="display: none;">
+        
+        <!-- SIDEBAR -->
         <aside class="admin-sidebar">
             <div class="admin-brand">
                 <img src="img/badge-sasp.png" alt="SASP">
@@ -31,6 +29,7 @@
             <button id="logoutBtn" class="btn btn-outline" style="margin-top: auto;">Déconnexion</button>
         </aside>
 
+        <!-- MAIN CONTENT -->
         <main class="admin-main">
             <div class="admin-topbar">
                 <h2>Gestion de la faction</h2>
@@ -105,20 +104,16 @@
         </main>
     </div>
 
-    <!-- ========================================== -->
-    <!-- MODALE : GESTION DES AGENTS                -->
-    <!-- ========================================== -->
+    <!-- MODALE AGENT (Gardée telle quelle) -->
     <div class="modal-overlay" id="agentModal">
         <div class="modal-content">
             <div class="modal-header">
                 <h3 id="agentModalTitle">Ajouter un Agent</h3>
                 <button class="modal-close" id="btnCloseAgentModal">&times;</button>
             </div>
-            
             <div class="modal-body">
                 <form id="agentForm">
                     <input type="hidden" id="agentId">
-                    
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                         <div class="form-group">
                             <label>Nom Prénom</label>
@@ -129,7 +124,6 @@
                             <input type="text" id="agentMatricule" placeholder="Ex: 1024">
                         </div>
                     </div>
-
                     <div class="form-group">
                         <label>Grade</label>
                         <select id="agentGrade">
@@ -145,7 +139,6 @@
                             <option value="Capitaine">Capitaine</option>
                         </select>
                     </div>
-
                     <div class="form-group">
                         <label>Divisions</label>
                         <div class="division-pill-group">
@@ -157,13 +150,10 @@
                             <label class="division-pill"><input type="checkbox" value="PA" class="agent-div-checkbox"> PA</label>
                         </div>
                     </div>
-
                     <div class="form-group" style="display: flex; align-items: center; gap: 10px; background: rgba(212, 175, 55, 0.1); padding: 15px; border-radius: 6px; border: 1px solid var(--gold); margin-top: 20px;">
                         <input type="checkbox" id="agentSup" style="width: 20px; height: 20px; cursor: pointer; accent-color: var(--gold);">
                         <label for="agentSup" style="margin: 0; cursor: pointer; color: var(--gold); font-weight: bold;">Supervisor de Terrain (SUP)</label>
                     </div>
-
-                    <!-- FORMATIONS EN PASTILLES -->
                     <div class="form-group">
                         <label>Formations Validées</label>
                         <div class="division-pill-group">
@@ -175,8 +165,6 @@
                             <label class="division-pill form-pill"><input type="checkbox" value="PROC" class="agent-form-checkbox"> <span>PROC</span></label>
                         </div>
                     </div>
-
-                    <!-- SANCTIONS EN PASTILLES -->
                     <div class="form-group">
                         <label>Sanctions</label>
                         <div class="division-pill-group">
@@ -188,7 +176,6 @@
                     </div>
                 </form>
             </div>
-            
             <div class="modal-footer">
                 <button class="btn btn-outline" id="btnCancelAgentModal">Annuler</button>
                 <button class="btn btn-primary" id="submitAgentBtn" form="agentForm" type="submit">Enregistrer</button>
