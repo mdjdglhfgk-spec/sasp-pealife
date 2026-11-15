@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Police Academy — SASP</title>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="img/badge-sasp.png">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- NAVIGATION -->
+    <header class="navbar scrolled">
+        <div class="nav-container">
+            <a href="index.html" class="nav-brand">
+                <img src="img/badge-sasp.png" alt="SASP Logo" class="nav-logo-img">
+                <div class="nav-brand-text">
+                    <span class="brand-title">SASP</span>
+                    <span class="brand-sub">San Andreas State Police</span>
+                </div>
+            </a>
+            <nav class="nav-links">
+                <a href="index.html" class="nav-link">Accueil</a>
+                <a href="annonces.html" class="nav-link">Annonces</a>
+                <a href="academy.html" class="nav-link active">Police Academy</a>
+                <a href="agents.html" class="nav-link">Registre</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- CONTENU -->
+    <main class="main-content" style="margin-top: 100px;">
+        <div class="section-header">
+            <span class="section-tag">Formation</span>
+            <h1 class="hero-title" style="font-size: 3.5rem; margin-bottom: 30px;">Planning de la Police Academy</h1>
+            <p class="section-intro" style="margin-bottom: 40px;">
+                Consultez les prochaines sessions de formation et les instructeurs assignés.
+            </p>
+        </div>
+
+        <div class="table-responsive" style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px;">
+            <table class="admin-table" style="margin-top: 0;">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Heure</th>
+                        <th>Instructeur</th>
+                        <th>Places / Détails</th>
+                    </tr>
+                </thead>
+                <tbody id="academyTableBody">
+                    <tr><td colspan="4" style="text-align: center;">Chargement du planning...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-bottom">
+                <p class="footer-copy">© 2026 San Andreas State Police.</p>
+                <p class="footer-devise">« To Protect and To Serve »</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- SCRIPT -->
+    <script type="module">
+        import { supabase } from './js/supabase.js';
+
+        async function fetchAcademy() {
+            const tbody = document.getElementById('academyTableBody');
+            
+            // On récupère les sessions triées par date
+            const { data: sessions, error } = await supabase
+                .from('academy_sessions')
+                .select('*')
+                .order('date_session', { ascending: true });
+
+            if (error || !sessions || sessions.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Aucune session planifiée pour le moment.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = '';
+            sessions.forEach(s => {
+                // Formatage de la date (ex: Lundi 12 Octobre 2026)
+                const dateObj = new Date(s.date_session);
+                const dateStr = dateObj.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="color: var(--text-main); font-weight: 600; text-transform: capitalize;">${dateStr}</td>
+                    <td style="color: var(--gold); font-weight: 700;">${s.heure}</td>
+                    <td style="color: var(--text-main);">${s.instructeur}</td>
+                    <td style="color: var(--text-muted);">${s.places || '-'}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        fetchAcademy();
+    </script>
+</body>
+</html>
