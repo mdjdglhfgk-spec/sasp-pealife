@@ -1,161 +1,166 @@
 import { supabase } from './supabase.js';
 
-// On cache le body pour éviter de voir la page clignoter
-document.body.style.visibility = 'hidden';
-document.body.style.opacity = '0';
+// On force l'affichage immédiat (pas de sécurité)
+document.body.style.visibility = 'visible';
+document.body.style.opacity = '1';
+document.getElementById('adminDashboard').style.display = 'flex';
 
 let allPages = [];
 const modal = document.getElementById('agentModal');
 
-// ==========================================
-// 1. SÉCURITÉ (Le portier)
-// ==========================================
-async function checkAuth() {
-    try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
-        // Si erreur ou pas de session = redirection vers le login
-        if (error || !session) {
-            window.location.replace('login.html');
-            return false;
-        }
-
-        // Si session OK = on affiche le dashboard
-        document.body.style.visibility = 'visible';
-        document.body.style.opacity = '1';
-        document.getElementById('adminDashboard').style.display = 'flex';
-        return true;
-        
-    } catch (err) {
-        window.location.replace('login.html');
-        return false;
-    }
-}
-
-// ==========================================
-// 2. FONCTIONS MODALES
-// ==========================================
+// Ouverture / fermeture de la modale
 function openModal() {
-    modal.classList.add('active');
-    document.body.style.overflow = 'hidden';
+    if (modal) {
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
 }
 
 function closeModal() {
-    modal.classList.remove('active');
-    document.body.style.overflow = '';
+    if (modal) {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+    }
 }
 
-// ==========================================
-// 3. INITIALISATION
-// ==========================================
-document.addEventListener('DOMContentLoaded', async () => {
-    const isAuth = await checkAuth();
-    if (!isAuth) return; // Si pas connecté, on arrête tout ici.
-
-    // Charger les données
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. Charger les données
     loadPages();
     loadAgents();
 
-    // Déconnexion
-    document.getElementById('logoutBtn').addEventListener('click', async () => {
-        await supabase.auth.signOut();
-        window.location.replace('login.html');
-    });
-
-    // Navigation par onglets
-    document.querySelectorAll('.admin-tab-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
+    // 2. GESTION DES ONGLETS
+    const tabBtns = document.querySelectorAll('.admin-tab-btn');
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            // On retire la classe active de tous les boutons et contenus
+            tabBtns.forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.admin-tab-content').forEach(c => c.classList.remove('active'));
-            e.target.classList.add('active');
-            document.getElementById(e.target.getAttribute('data-target')).classList.add('active');
+            
+            // On ajoute la classe active au bouton cliqué et à sa cible
+            this.classList.add('active');
+            const targetId = this.getAttribute('data-target');
+            const targetContent = document.getElementById(targetId);
+            
+            if (targetContent) {
+                targetContent.classList.add('active');
+            } else {
+                console.error("Impossible de trouver l'onglet cible :", targetId);
+            }
         });
     });
 
-    // Recherche de pages
-    document.getElementById('searchInput').addEventListener('input', (e) => {
-        const term = e.target.value.toLowerCase();
-        const filtered = allPages.filter(p => p.title.toLowerCase().includes(term) || p.slug.toLowerCase().includes(term));
-        renderPagesTable(filtered);
-    });
+    // 3. Recherche dans les pages
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            const filtered = allPages.filter(p => 
+                p.title.toLowerCase().includes(term) || 
+                p.slug.toLowerCase().includes(term)
+            );
+            renderPagesTable(filtered);
+        });
+    }
 
-    // Bouton Nouvel Agent
-    document.getElementById('btnCreateAgent').addEventListener('click', () => {
-        document.getElementById('agentForm').reset();
-        document.getElementById('agentId').value = '';
-        document.getElementById('agentSup').checked = false;
-        
-        document.querySelectorAll('.agent-div-checkbox, .agent-form-checkbox, .agent-sanction-checkbox').forEach(cb => cb.checked = false);
+    // 4. Bouton Nouvel Agent
+    const btnCreateAgent = document.getElementById('btnCreateAgent');
+    if (btnCreateAgent) {
+        btnCreateAgent.addEventListener('click', () => {
+            document.getElementById('agentForm').reset();
+            document.getElementById('agentId').value = '';
+            document.getElementById('agentSup').checked = false;
+            
+            // Décocher toutes les cases
+            document.querySelectorAll('.agent-div-checkbox, .agent-form-checkbox, .agent-sanction-checkbox').forEach(cb => cb.checked = false);
 
-        document.getElementById('agentModalTitle').textContent = "Ajouter un Agent";
-        openModal();
-    });
+            document.getElementById('agentModalTitle').textContent = "Ajouter un Agent";
+            openModal();
+        });
+    }
 
-    // Fermeture modales
-    document.getElementById('btnCloseAgentModal').addEventListener('click', closeModal);
-    document.getElementById('btnCancelAgentModal').addEventListener('click', closeModal);
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) closeModal();
-    });
+    // 5. Fermeture de la modale
+    const btnClose = document.getElementById('btnCloseAgentModal');
+    const btnCancel = document.getElementById('btnCancelAgentModal');
+    
+    if (btnClose) btnClose.addEventListener('click', closeModal);
+    if (btnCancel) btnCancel.addEventListener('click', closeModal);
+    
+    if (modal) {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeModal();
+        });
+    }
 
-    // Sauvegarde d'un Agent
-    document.getElementById('agentForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const id = document.getElementById('agentId').value;
-        const btn = document.getElementById('submitAgentBtn');
-        
-        const selectedDivisions = Array.from(document.querySelectorAll('.agent-div-checkbox:checked')).map(cb => cb.value);
-        const selectedFormations = Array.from(document.querySelectorAll('.agent-form-checkbox:checked')).map(cb => cb.value);
-        const selectedSanctions = Array.from(document.querySelectorAll('.agent-sanction-checkbox:checked')).map(cb => cb.value);
+    // 6. Sauvegarde d'un Agent
+    const agentForm = document.getElementById('agentForm');
+    if (agentForm) {
+        agentForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('agentId').value;
+            const btn = document.getElementById('submitAgentBtn');
+            
+            const selectedDivisions = Array.from(document.querySelectorAll('.agent-div-checkbox:checked')).map(cb => cb.value);
+            const selectedFormations = Array.from(document.querySelectorAll('.agent-form-checkbox:checked')).map(cb => cb.value);
+            const selectedSanctions = Array.from(document.querySelectorAll('.agent-sanction-checkbox:checked')).map(cb => cb.value);
 
-        const agentData = {
-            nom: document.getElementById('agentNom').value,
-            matricule: document.getElementById('agentMatricule').value,
-            grade: document.getElementById('agentGrade').value,
-            division: selectedDivisions,
-            formations: selectedFormations,
-            sanctions: selectedSanctions,
-            est_superviseur: document.getElementById('agentSup').checked
-        };
+            const agentData = {
+                nom: document.getElementById('agentNom').value,
+                matricule: document.getElementById('agentMatricule').value,
+                grade: document.getElementById('agentGrade').value,
+                division: selectedDivisions,
+                formations: selectedFormations,
+                sanctions: selectedSanctions,
+                est_superviseur: document.getElementById('agentSup').checked
+            };
 
-        btn.textContent = "Enregistrement...";
-        btn.disabled = true;
+            btn.textContent = "Enregistrement...";
+            btn.disabled = true;
 
-        let error;
-        if (id) {
-            const { error: err } = await supabase.from('agents').update(agentData).eq('id', id);
-            error = err;
-        } else {
-            const { error: err } = await supabase.from('agents').insert([agentData]);
-            error = err;
-        }
+            let error;
+            if (id) {
+                const { error: err } = await supabase.from('agents').update(agentData).eq('id', id);
+                error = err;
+            } else {
+                const { error: err } = await supabase.from('agents').insert([agentData]);
+                error = err;
+            }
 
-        btn.textContent = "Enregistrer";
-        btn.disabled = false;
+            btn.textContent = "Enregistrer";
+            btn.disabled = false;
 
-        if (error) {
-            alert("Erreur : " + error.message);
-        } else {
-            closeModal();
-            showToast("Agent enregistré !");
-            loadAgents();
-        }
-    });
+            if (error) {
+                alert("Erreur Supabase : " + error.message);
+            } else {
+                closeModal();
+                showToast("Agent enregistré !");
+                loadAgents();
+            }
+        });
+    }
 });
 
 // ==========================================
-// 4. CHARGEMENT DES PAGES
+// CHARGEMENT DES PAGES
 // ==========================================
 async function loadPages() {
+    const tbody = document.getElementById('pagesTableBody');
+    if (!tbody) return;
+
     const { data: pages, error } = await supabase.from('pages').select('*').order('created_at', { ascending: false });
-    if (!error) {
-        allPages = pages || [];
-        renderPagesTable(allPages);
+    
+    if (error) {
+        tbody.innerHTML = `<tr><td colspan="3" style="color:red; text-align:center;">Erreur: ${error.message}</td></tr>`;
+        return;
     }
+    
+    allPages = pages || [];
+    renderPagesTable(allPages);
 }
 
 function renderPagesTable(pagesToRender) {
     const tbody = document.getElementById('pagesTableBody');
+    if (!tbody) return;
+
     if (pagesToRender.length === 0) {
         tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">Aucune page.</td></tr>';
         return;
@@ -166,7 +171,7 @@ function renderPagesTable(pagesToRender) {
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td>${page.title}</td>
-            <td><a href="page.html?slug=${page.slug}" target="_blank" style="color:var(--gold);">/${page.slug}</a></td>
+            <td><a href="page.html?slug=${page.slug}" target="_blank" style="color:var(--admin-primary);">/${page.slug}</a></td>
             <td style="text-align: right;">
                 <a href="editer.html?id=${page.id}" class="btn-sm btn-edit">Modifier</a>
                 <button class="btn-sm btn-delete" onclick="deletePage('${page.id}')">Supprimer</button>
@@ -184,13 +189,20 @@ window.deletePage = async (id) => {
 };
 
 // ==========================================
-// 5. CHARGEMENT DES AGENTS
+// CHARGEMENT DES AGENTS
 // ==========================================
 async function loadAgents() {
     const tbody = document.getElementById('agentsTableBody');
+    if (!tbody) return;
+
     const { data: agents, error } = await supabase.from('agents').select('*').order('nom', { ascending: true });
 
-    if (error || !agents || agents.length === 0) {
+    if (error) {
+        tbody.innerHTML = `<tr><td colspan="5" style="color:red; text-align:center;">Erreur: ${error.message}</td></tr>`;
+        return;
+    }
+
+    if (!agents || agents.length === 0) {
         tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Aucun agent.</td></tr>';
         return;
     }
@@ -198,7 +210,7 @@ async function loadAgents() {
     tbody.innerHTML = '';
     agents.forEach(agent => {
         const tr = document.createElement('tr');
-        const supBadge = agent.est_superviseur ? ' <span class="agent-badge" style="background:var(--gold); color:var(--bg-dark); font-weight:bold; margin-left:5px; font-size:0.7rem;">SUP</span>' : '';
+        const supBadge = agent.est_superviseur ? ' <span class="agent-badge" style="background:var(--admin-primary); color:#000; font-weight:bold; margin-left:5px; font-size:0.7rem;">SUP</span>' : '';
         
         let divisionsDisplay = '-';
         if (agent.division) {
@@ -258,7 +270,9 @@ window.deleteAgent = async (id) => {
 
 function showToast(message) {
     const toast = document.getElementById('toast');
-    document.getElementById('toastMessage').textContent = message;
-    toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 3000);
+    if (toast) {
+        document.getElementById('toastMessage').textContent = message;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3000);
+    }
 }
