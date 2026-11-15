@@ -5,11 +5,12 @@
     <title>SASP — Command Center</title>
     <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="img/badge-sasp.png">
-    <link rel="stylesheet" href="css/style.css">
+    
+    <!-- LE CSS EXCLUSIF À L'ADMIN -->
+    <link rel="stylesheet" href="css/admin.css">
 </head>
 <body class="admin-body">
 
-    <!-- DASHBOARD (Affiché par défaut, plus de cercle) -->
     <div class="admin-dashboard" id="adminDashboard" style="display: flex;">
         
         <!-- SIDEBAR -->
@@ -26,7 +27,6 @@
                 <a href="index.html" target="_blank">Voir le site public</a>
                 <a href="agents.html" target="_blank">Voir le registre</a>
             </nav>
-            <button id="logoutBtn" class="btn btn-outline" style="margin-top: auto;">Déconnexion</button>
         </aside>
 
         <!-- MAIN CONTENT -->
@@ -34,7 +34,7 @@
             <div class="admin-topbar">
                 <h2>Gestion de la faction</h2>
                 <div class="admin-user">
-                    <span class="status-dot"></span> Administrateur connecté
+                    <span class="status-dot"></span> Mode Administrateur
                 </div>
             </div>
 
@@ -104,7 +104,7 @@
         </main>
     </div>
 
-    <!-- MODALE : GESTION DES AGENTS -->
+    <!-- MODALE AGENT -->
     <div class="modal-overlay" id="agentModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -154,9 +154,9 @@
                         </div>
                     </div>
 
-                    <div class="form-group" style="display: flex; align-items: center; gap: 10px; background: rgba(212, 175, 55, 0.1); padding: 15px; border-radius: 6px; border: 1px solid var(--gold); margin-top: 20px;">
-                        <input type="checkbox" id="agentSup" style="width: 20px; height: 20px; cursor: pointer; accent-color: var(--gold);">
-                        <label for="agentSup" style="margin: 0; cursor: pointer; color: var(--gold); font-weight: bold;">Supervisor de Terrain (SUP)</label>
+                    <div class="form-group" style="display: flex; align-items: center; gap: 10px; background: rgba(234, 179, 8, 0.1); padding: 15px; border-radius: 6px; border: 1px solid var(--admin-primary); margin-top: 20px;">
+                        <input type="checkbox" id="agentSup" style="width: 20px; height: 20px; cursor: pointer; accent-color: var(--admin-primary);">
+                        <label for="agentSup" style="margin: 0; cursor: pointer; color: var(--admin-primary); font-weight: bold;">Supervisor de Terrain (SUP)</label>
                     </div>
 
                     <div class="form-group">
@@ -189,12 +189,10 @@
         </div>
     </div>
 
-    <!-- NOTIFICATION TOAST -->
     <div class="toast-notification" id="toast">
         <span id="toastMessage">Opération réussie !</span>
     </div>
 
-    <!-- SCRIPT -->
     <script type="module" src="js/admin.js"></script>
 </body>
 </html>
