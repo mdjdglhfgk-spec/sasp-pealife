@@ -34,27 +34,33 @@
                 </div>
             </div>
 
-            <!-- ONGLETS -->
             <div class="admin-tabs">
                 <button class="admin-tab-btn active" data-target="tab-pages">📄 Pages</button>
                 <button class="admin-tab-btn" data-target="tab-agents">👮 Agents</button>
                 <button class="admin-tab-btn" data-target="tab-annonces">📢 Annonces</button>
-                <button class="admin-tab-btn" data-target="tab-academy">🎓 Police Academy</button>
+                <button class="admin-tab-btn" data-target="tab-academy">🎓 Academy</button>
             </div>
 
             <!-- ONGLET PAGES -->
             <div id="tab-pages" class="admin-tab-content active">
+                <!-- STATISTIQUES -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-info"><h4>Total Pages</h4><span id="statTotalPages">0</span></div>
+                        <div class="stat-icon">📄</div>
+                    </div>
+                    <div class="stat-card blue">
+                        <div class="stat-info"><h4>Dernière mise à jour</h4><span id="statLastPage" style="font-size:1.2rem; margin-top:10px;">-</span></div>
+                        <div class="stat-icon">🕒</div>
+                    </div>
+                </div>
+
                 <div class="admin-panel">
                     <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <h3>Pages du site</h3>
-                            <p>Gérez le contenu textuel.</p>
-                        </div>
+                        <div><h3>Pages du site</h3><p>Gérez le contenu textuel.</p></div>
                         <a href="editer.html" class="btn btn-primary">+ Nouvelle Page</a>
                     </div>
-                    <div class="admin-search-bar">
-                        <input type="text" id="searchInput" placeholder="Rechercher une page...">
-                    </div>
+                    <div class="admin-search-bar"><input type="text" id="searchInput" placeholder="Rechercher une page..."></div>
                     <div class="table-responsive">
                         <table class="admin-table">
                             <thead><tr><th>Titre</th><th>URL</th><th style="text-align: right;">Actions</th></tr></thead>
@@ -66,12 +72,25 @@
 
             <!-- ONGLET AGENTS -->
             <div id="tab-agents" class="admin-tab-content">
+                <!-- STATISTIQUES -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-info"><h4>Effectif Total</h4><span id="statTotalAgents">0</span></div>
+                        <div class="stat-icon">👮</div>
+                    </div>
+                    <div class="stat-card green">
+                        <div class="stat-info"><h4>Superviseurs</h4><span id="statTotalSup">0</span></div>
+                        <div class="stat-icon">⭐</div>
+                    </div>
+                    <div class="stat-card red">
+                        <div class="stat-info"><h4>Agents Sanctionnés</h4><span id="statTotalSanctioned">0</span></div>
+                        <div class="stat-icon">⚠️</div>
+                    </div>
+                </div>
+
                 <div class="admin-panel">
                     <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <h3>Registre des Agents</h3>
-                            <p>Gérez les effectifs et formations.</p>
-                        </div>
+                        <div><h3>Registre des Agents</h3><p>Gérez les effectifs et formations.</p></div>
                         <button class="btn btn-primary" id="btnCreateAgent">+ Nouvel Agent</button>
                     </div>
                     <div class="table-responsive">
@@ -85,12 +104,16 @@
 
             <!-- ONGLET ANNONCES -->
             <div id="tab-annonces" class="admin-tab-content">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-info"><h4>Annonces Publiées</h4><span id="statTotalAnnonces">0</span></div>
+                        <div class="stat-icon">📢</div>
+                    </div>
+                </div>
+
                 <div class="admin-panel">
                     <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <h3>Annonces Officielles</h3>
-                            <p>Publiez des informations pour la faction.</p>
-                        </div>
+                        <div><h3>Annonces Officielles</h3><p>Publiez des informations.</p></div>
                         <button class="btn btn-primary" id="btnCreateAnnonce">+ Nouvelle Annonce</button>
                     </div>
                     <div class="table-responsive">
@@ -104,12 +127,16 @@
 
             <!-- ONGLET ACADEMY -->
             <div id="tab-academy" class="admin-tab-content">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-info"><h4>Sessions Planifiées</h4><span id="statTotalSessions">0</span></div>
+                        <div class="stat-icon">🎓</div>
+                    </div>
+                </div>
+
                 <div class="admin-panel">
                     <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <h3>Planning Police Academy</h3>
-                            <p>Planifiez les sessions de formation.</p>
-                        </div>
+                        <div><h3>Planning Police Academy</h3><p>Planifiez les sessions.</p></div>
                         <button class="btn btn-primary" id="btnCreateSession">+ Nouvelle Session</button>
                     </div>
                     <div class="table-responsive">
@@ -124,15 +151,11 @@
         </main>
     </div>
 
-    <!-- ================= MODALES ================= -->
-
+    <!-- ================= MODALES ================= (Identiques à avant) -->
     <!-- MODALE AGENT -->
     <div class="modal-overlay" id="agentModal">
         <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="agentModalTitle">Ajouter un Agent</h3>
-                <button class="modal-close" id="btnCloseAgentModal">&times;</button>
-            </div>
+            <div class="modal-header"><h3 id="agentModalTitle">Ajouter un Agent</h3><button class="modal-close" id="btnCloseAgentModal">&times;</button></div>
             <div class="modal-body">
                 <form id="agentForm">
                     <input type="hidden" id="agentId">
@@ -140,22 +163,12 @@
                         <div class="form-group"><label>Nom Prénom</label><input type="text" id="agentNom" required></div>
                         <div class="form-group"><label>Matricule</label><input type="text" id="agentMatricule"></div>
                     </div>
-                    <div class="form-group">
-                        <label>Grade</label>
+                    <div class="form-group"><label>Grade</label>
                         <select id="agentGrade">
-                            <option value="Rookie">Rookie</option>
-                            <option value="Officier I">Officier I</option>
-                            <option value="Officier II">Officier II</option>
-                            <option value="Officier III">Officier III</option>
-                            <option value="SLO">SLO</option>
-                            <option value="Sergent I">Sergent I</option>
-                            <option value="Sergent II">Sergent II</option>
-                            <option value="Lieutenant">Lieutenant</option>
-                            <option value="Capitaine">Capitaine</option>
+                            <option value="Rookie">Rookie</option><option value="Officier I">Officier I</option><option value="Officier II">Officier II</option><option value="Officier III">Officier III</option><option value="SLO">SLO</option><option value="Sergent I">Sergent I</option><option value="Sergent II">Sergent II</option><option value="Lieutenant">Lieutenant</option><option value="Capitaine">Capitaine</option>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label>Divisions</label>
+                    <div class="form-group"><label>Divisions</label>
                         <div class="division-pill-group">
                             <label class="division-pill"><input type="checkbox" value="METRO" class="agent-div-checkbox"> METRO</label>
                             <label class="division-pill"><input type="checkbox" value="HIGHWAY" class="agent-div-checkbox"> HIGHWAY</label>
@@ -163,15 +176,12 @@
                             <label class="division-pill"><input type="checkbox" value="MCD" class="agent-div-checkbox"> MCD</label>
                             <label class="division-pill"><input type="checkbox" value="FTO" class="agent-div-checkbox"> FTO</label>
                             <label class="division-pill"><input type="checkbox" value="PA" class="agent-div-checkbox"> PA</label>
-                            <label class="division-pill"><input type="checkbox" value="TOUT" class="agent-div-checkbox"> ALL</label>
                         </div>
                     </div>
                     <div class="form-group" style="display: flex; align-items: center; gap: 10px; background: rgba(234, 179, 8, 0.1); padding: 15px; border-radius: 6px; border: 1px solid var(--admin-primary); margin-top: 20px;">
-                        <input type="checkbox" id="agentSup" style="width: 20px; height: 20px; cursor: pointer; accent-color: var(--admin-primary);">
-                        <label for="agentSup" style="margin: 0; cursor: pointer; color: var(--admin-primary); font-weight: bold;">Supervisor de Terrain (SUP)</label>
+                        <input type="checkbox" id="agentSup" style="width: 20px; height: 20px; cursor: pointer; accent-color: var(--admin-primary);"><label for="agentSup" style="margin: 0; cursor: pointer; color: var(--admin-primary); font-weight: bold;">Supervisor (SUP)</label>
                     </div>
-                    <div class="form-group">
-                        <label>Formations Validées</label>
+                    <div class="form-group"><label>Formations</label>
                         <div class="division-pill-group">
                             <label class="division-pill form-pill"><input type="checkbox" value="PA" class="agent-form-checkbox"> <span>PA</span></label>
                             <label class="division-pill form-pill"><input type="checkbox" value="PPA" class="agent-form-checkbox"> <span>PPA</span></label>
@@ -179,11 +189,9 @@
                             <label class="division-pill form-pill"><input type="checkbox" value="CDU" class="agent-form-checkbox"> <span>CDU</span></label>
                             <label class="division-pill form-pill"><input type="checkbox" value="F-T" class="agent-form-checkbox"> <span>F-T</span></label>
                             <label class="division-pill form-pill"><input type="checkbox" value="PROC" class="agent-form-checkbox"> <span>PROC</span></label>
-                            <label class="division-pill form-pill"><input type="checkbox" value="NEGO" class="agent-form-checkbox"> <span>NEGOCIATION</span></label>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label>Sanctions</label>
+                    <div class="form-group"><label>Sanctions</label>
                         <div class="division-pill-group">
                             <label class="division-pill sanction-pill"><input type="checkbox" value="B1" class="agent-sanction-checkbox"> <span>B1</span></label>
                             <label class="division-pill sanction-pill"><input type="checkbox" value="B2" class="agent-sanction-checkbox"> <span>B2</span></label>
@@ -193,84 +201,46 @@
                     </div>
                 </form>
             </div>
-            <div class="modal-footer">
-                <button class="btn btn-outline" id="btnCancelAgentModal">Annuler</button>
-                <button class="btn btn-primary" id="submitAgentBtn" form="agentForm" type="submit">Enregistrer</button>
-            </div>
+            <div class="modal-footer"><button class="btn btn-outline" id="btnCancelAgentModal">Annuler</button><button class="btn btn-primary" id="submitAgentBtn" form="agentForm" type="submit">Enregistrer</button></div>
         </div>
     </div>
 
     <!-- MODALE ANNONCE -->
     <div class="modal-overlay" id="annonceModal">
         <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="annonceModalTitle">Nouvelle Annonce</h3>
-                <button class="modal-close" id="btnCloseAnnonceModal">&times;</button>
-            </div>
+            <div class="modal-header"><h3 id="annonceModalTitle">Nouvelle Annonce</h3><button class="modal-close" id="btnCloseAnnonceModal">&times;</button></div>
             <div class="modal-body">
                 <form id="annonceForm">
                     <input type="hidden" id="annonceId">
-                    <div class="form-group">
-                        <label>Titre de l'annonce</label>
-                        <input type="text" id="annonceTitre" required placeholder="Ex: Changement de règlement">
-                    </div>
-                    <div class="form-group">
-                        <label>Auteur</label>
-                        <input type="text" id="annonceAuteur" required placeholder="Ex: Chef de la Police">
-                    </div>
-                    <div class="form-group">
-                        <label>Contenu (HTML accepté)</label>
-                        <textarea id="annonceContenu" required style="height: 150px; width: 100%; background: var(--admin-bg); border: 1px solid var(--admin-border); color: var(--admin-text); border-radius: 8px; padding: 15px; font-family: inherit;"></textarea>
-                    </div>
+                    <div class="form-group"><label>Titre</label><input type="text" id="annonceTitre" required></div>
+                    <div class="form-group"><label>Auteur</label><input type="text" id="annonceAuteur" required></div>
+                    <div class="form-group"><label>Contenu (HTML)</label><textarea id="annonceContenu" required style="height: 150px; width: 100%; background: var(--admin-bg); border: 1px solid var(--admin-border); color: var(--admin-text); border-radius: 8px; padding: 15px;"></textarea></div>
                 </form>
             </div>
-            <div class="modal-footer">
-                <button class="btn btn-outline" id="btnCancelAnnonceModal">Annuler</button>
-                <button class="btn btn-primary" id="submitAnnonceBtn" form="annonceForm" type="submit">Publier</button>
-            </div>
+            <div class="modal-footer"><button class="btn btn-outline" id="btnCancelAnnonceModal">Annuler</button><button class="btn btn-primary" id="submitAnnonceBtn" form="annonceForm" type="submit">Publier</button></div>
         </div>
     </div>
 
-    <!-- MODALE ACADEMY -->
+    <!-- MODALE SESSION -->
     <div class="modal-overlay" id="sessionModal">
         <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="sessionModalTitle">Nouvelle Session PA</h3>
-                <button class="modal-close" id="btnCloseSessionModal">&times;</button>
-            </div>
+            <div class="modal-header"><h3 id="sessionModalTitle">Nouvelle Session PA</h3><button class="modal-close" id="btnCloseSessionModal">&times;</button></div>
             <div class="modal-body">
                 <form id="sessionForm">
                     <input type="hidden" id="sessionId">
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                        <div class="form-group">
-                            <label>Date</label>
-                            <input type="date" id="sessionDate" required style="color-scheme: dark;">
-                        </div>
-                        <div class="form-group">
-                            <label>Heure</label>
-                            <input type="time" id="sessionHeure" required style="color-scheme: dark;">
-                        </div>
+                        <div class="form-group"><label>Date</label><input type="date" id="sessionDate" required style="color-scheme: dark;"></div>
+                        <div class="form-group"><label>Heure</label><input type="time" id="sessionHeure" required style="color-scheme: dark;"></div>
                     </div>
-                    <div class="form-group">
-                        <label>Instructeur</label>
-                        <input type="text" id="sessionInstructeur" required placeholder="Ex: Sergent John Doe">
-                    </div>
-                    <div class="form-group">
-                        <label>Places (ou informations)</label>
-                        <input type="text" id="sessionPlaces" placeholder="Ex: 10 places disponibles">
-                    </div>
+                    <div class="form-group"><label>Instructeur</label><input type="text" id="sessionInstructeur" required></div>
+                    <div class="form-group"><label>Places</label><input type="text" id="sessionPlaces"></div>
                 </form>
             </div>
-            <div class="modal-footer">
-                <button class="btn btn-outline" id="btnCancelSessionModal">Annuler</button>
-                <button class="btn btn-primary" id="submitSessionBtn" form="sessionForm" type="submit">Créer la session</button>
-            </div>
+            <div class="modal-footer"><button class="btn btn-outline" id="btnCancelSessionModal">Annuler</button><button class="btn btn-primary" id="submitSessionBtn" form="sessionForm" type="submit">Créer</button></div>
         </div>
     </div>
 
-    <div class="toast-notification" id="toast">
-        <span id="toastMessage">Opération réussie !</span>
-    </div>
+    <div class="toast-notification" id="toast"><span id="toastMessage">Opération réussie !</span></div>
 
     <script type="module" src="js/admin.js"></script>
 </body>
