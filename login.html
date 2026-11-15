@@ -43,50 +43,31 @@
     </div>
 
     <script type="module">
-        import { supabase } from './js/supabase.js';
+    import { supabase } from './js/supabase.js';
 
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const msg = document.getElementById('statusMsg');
-            const btn = document.getElementById('loginBtn');
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const msg = document.getElementById('statusMsg');
+        const btn = document.getElementById('loginBtn');
 
-            // Reset de l'interface
-            btn.textContent = "Vérification...";
-            btn.disabled = true;
-            msg.className = 'status-message';
-            msg.textContent = '';
+        btn.textContent = "Connexion...";
+        btn.disabled = true;
 
-            try {
-                // Tentative de connexion
-                const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
-                if (error) {
-                    // Supabase a refusé la connexion (mauvais mot de passe, etc.)
-                    msg.className = 'status-message error';
-                    msg.textContent = "Erreur : " + error.message;
-                    btn.textContent = "Se connecter";
-                    btn.disabled = false;
-                } else {
-                    // Connexion réussie
-                    msg.className = 'status-message success';
-                    msg.textContent = "Connexion réussie ! Redirection...";
-                    
-                    // Redirection vers l'admin après 800ms (le temps que la session s'enregistre)
-                    setTimeout(() => {
-                        window.location.href = 'admin.html';
-                    }, 800);
-                }
-            } catch (err) {
-                // Erreur critique (ex: fichier supabase.js introuvable)
-                msg.className = 'status-message error';
-                msg.textContent = "Erreur critique : " + err.message;
-                btn.textContent = "Se connecter";
-                btn.disabled = false;
-            }
-        });
-    </script>
+        if (error) {
+            msg.className = 'status-message error';
+            msg.textContent = error.message; // Affiche l'erreur exacte
+            btn.textContent = "Se connecter";
+            btn.disabled = false;
+        } else {
+            // Redirection immédiate, on ne laisse pas le navigateur décider
+            window.location.replace('admin.html');
+        }
+    });
+</script>
 </body>
 </html>
