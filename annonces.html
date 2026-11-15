@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Annonces Officielles — SASP</title>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="img/badge-sasp.png">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- NAVIGATION -->
+    <header class="navbar scrolled">
+        <div class="nav-container">
+            <a href="index.html" class="nav-brand">
+                <img src="img/badge-sasp.png" alt="SASP Logo" class="nav-logo-img">
+                <div class="nav-brand-text">
+                    <span class="brand-title">SASP</span>
+                    <span class="brand-sub">San Andreas State Police</span>
+                </div>
+            </a>
+            <nav class="nav-links">
+                <a href="index.html" class="nav-link">Accueil</a>
+                <a href="annonces.html" class="nav-link active">Annonces</a>
+                <a href="agents.html" class="nav-link">Registre</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- CONTENU -->
+    <main class="main-content" style="margin-top: 100px;">
+        <div class="section-header">
+            <span class="section-tag">Communication</span>
+            <h1 class="hero-title" style="font-size: 3.5rem; margin-bottom: 30px;">Annonces Officielles</h1>
+            <p class="section-intro" style="margin-bottom: 40px;">
+                Retrouvez ici toutes les communications officielles du commandement du San Andreas State Police.
+            </p>
+        </div>
+
+        <div id="annoncesList" class="cards-grid">
+            <p style="color: var(--text-muted);">Chargement des annonces...</p>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-bottom">
+                <p class="footer-copy">© 2026 San Andreas State Police.</p>
+                <p class="footer-devise">« To Protect and To Serve »</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- SCRIPT -->
+    <script type="module">
+        import { supabase } from './js/supabase.js';
+
+        async function fetchAnnonces() {
+            const container = document.getElementById('annoncesList');
+            
+            // On récupère les annonces de la plus récente à la plus ancienne
+            const { data: annonces, error } = await supabase
+                .from('annonces')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error || !annonces || annonces.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-muted); text-align: center; grid-column: 1/-1;">Aucune annonce n\'a été publiée pour le moment.</p>';
+                return;
+            }
+
+            container.innerHTML = '';
+            annonces.forEach(a => {
+                const date = new Date(a.created_at).toLocaleDateString('fr-FR', {
+                    day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                });
+
+                // On utilise le style des "cards" de votre site
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                        <h3 style="font-family: var(--font-heading); font-size: 1.6rem; color: var(--gold); margin: 0;">${a.titre}</h3>
+                        <span style="font-size: 0.75rem; background: rgba(212, 175, 55, 0.1); color: var(--gold); padding: 4px 8px; border-radius: 4px;">${date}</span>
+                    </div>
+                    <div style="color: var(--text-main); font-size: 0.95rem; margin-bottom: 20px; line-height: 1.6;">
+                        ${a.contenu}
+                    </div>
+                    <div style="border-top: 1px solid var(--border); padding-top: 15px; font-size: 0.85rem; color: var(--text-muted); display: flex; align-items: center; gap: 8px;">
+                        <span style="width: 30px; height: 30px; background: var(--surface); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid var(--gold);">
+                            👤
+                        </span>
+                        Publié par <strong style="color: var(--text-main);">${a.auteur}</strong>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        fetchAnnonces();
+    </script>
+</body>
+</html>
