@@ -17,6 +17,7 @@ function toggleModal(id, show) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Charger les données au démarrage
     loadPages();
     loadAgents();
     loadAnnonces();
@@ -41,10 +42,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // ==========================================
-    // FORMULAIRES & BOUTONS
+    // GESTION DES BOUTONS ET FORMULAIRES
     // ==========================================
 
-    // 1. AGENT
+    // 1. AGENT (Ouverture / Fermeture / Sauvegarde)
     document.getElementById('btnCreateAgent')?.addEventListener('click', () => {
         document.getElementById('agentForm').reset();
         document.getElementById('agentId').value = '';
@@ -97,7 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // 2. ANNONCE
+    // 2. ANNONCE (Ouverture / Fermeture / Sauvegarde)
     document.getElementById('btnCreateAnnonce')?.addEventListener('click', () => {
         document.getElementById('annonceForm').reset();
         document.getElementById('annonceId').value = '';
@@ -134,7 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // 3. SESSION PA
+    // 3. ACADEMY (Ouverture / Fermeture / Sauvegarde) - C'ÉTAIT ICI LE BUG
     document.getElementById('btnCreateSession')?.addEventListener('click', () => {
         document.getElementById('sessionForm').reset();
         document.getElementById('sessionId').value = '';
@@ -186,6 +187,7 @@ async function loadPages() {
 
 function renderPagesTable(pagesToRender) {
     const tbody = document.getElementById('pagesTableBody');
+    if (!tbody) return;
     if (pagesToRender.length === 0) { tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">Aucune page.</td></tr>'; return; }
     tbody.innerHTML = '';
     pagesToRender.forEach(page => {
@@ -204,6 +206,7 @@ window.deletePage = async (id) => {
 async function loadAgents() {
     const { data: agents } = await supabase.from('agents').select('*').order('nom', { ascending: true });
     const tbody = document.getElementById('agentsTableBody');
+    if (!tbody) return;
     if (!agents || agents.length === 0) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Aucun agent.</td></tr>'; return; }
     tbody.innerHTML = '';
     agents.forEach(agent => {
@@ -241,6 +244,7 @@ window.deleteAgent = async (id) => {
 async function loadAnnonces() {
     const { data: annonces } = await supabase.from('annonces').select('*').order('created_at', { ascending: false });
     const tbody = document.getElementById('annoncesTableBody');
+    if (!tbody) return;
     if (!annonces || annonces.length === 0) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Aucune annonce.</td></tr>'; return; }
     tbody.innerHTML = '';
     annonces.forEach(annonce => {
@@ -271,6 +275,7 @@ window.deleteAnnonce = async (id) => {
 async function loadAcademy() {
     const { data: sessions } = await supabase.from('academy_sessions').select('*').order('date_session', { ascending: true });
     const tbody = document.getElementById('academyTableBody');
+    if (!tbody) return;
     if (!sessions || sessions.length === 0) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Aucune session planifiée.</td></tr>'; return; }
     tbody.innerHTML = '';
     sessions.forEach(session => {
