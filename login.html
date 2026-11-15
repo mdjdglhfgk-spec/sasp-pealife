@@ -43,31 +43,44 @@
     </div>
 
     <script type="module">
-    import { supabase } from './js/supabase.js';
+        import { supabase } from './js/supabase.js';
 
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
-        const msg = document.getElementById('statusMsg');
-        const btn = document.getElementById('loginBtn');
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const msg = document.getElementById('statusMsg');
+            const btn = document.getElementById('loginBtn');
 
-        btn.textContent = "Connexion...";
-        btn.disabled = true;
+            btn.textContent = "Vérification...";
+            btn.disabled = true;
+            msg.className = 'status-message';
+            msg.textContent = '';
 
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+            try {
+                const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
-        if (error) {
-            msg.className = 'status-message error';
-            msg.textContent = error.message; // Affiche l'erreur exacte
-            btn.textContent = "Se connecter";
-            btn.disabled = false;
-        } else {
-            // Redirection immédiate, on ne laisse pas le navigateur décider
-            window.location.replace('admin.html');
-        }
-    });
-</script>
+                if (error) {
+                    msg.className = 'status-message error';
+                    msg.textContent = "Erreur : " + error.message;
+                    btn.textContent = "Se connecter";
+                    btn.disabled = false;
+                } else {
+                    msg.className = 'status-message success';
+                    msg.textContent = "Connexion réussie ! Redirection en cours...";
+                    
+                    setTimeout(() => {
+                        window.location.href = 'admin.html';
+                    }, 1000);
+                }
+            } catch (err) {
+                msg.className = 'status-message error';
+                msg.textContent = "Erreur critique : " + err.message;
+                btn.textContent = "Se connecter";
+                btn.disabled = false;
+            }
+        });
+    </script>
 </body>
 </html>
