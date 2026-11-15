@@ -356,3 +356,78 @@ body.admin-body {
     display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 1.1rem;
 }
 .toast-notification.show { transform: translateY(0); opacity: 1; }
+
+/* ============================================================
+   STATISTIQUES (KPIs)
+   ============================================================ */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+    width: 100%;
+}
+
+.stat-card {
+    background: var(--admin-surface);
+    border: 1px solid var(--admin-border);
+    border-radius: 10px;
+    padding: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+}
+
+.stat-card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 4px; height: 100%;
+    background: var(--admin-primary);
+}
+
+.stat-card.blue::after { background: var(--admin-blue); }
+.stat-card.red::after { background: var(--admin-red); }
+.stat-card.green::after { background: var(--admin-green); }
+
+.stat-info h4 {
+    font-size: 0.85rem;
+    color: var(--admin-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 5px;
+}
+
+.stat-info span {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--admin-text);
+    line-height: 1;
+}
+
+.stat-icon {
+    font-size: 2rem;
+    opacity: 0.2;
+}
+
+/* Pour que les panneaux prennent toute la largeur */
+.admin-main {
+    align-items: stretch;
+}
+.admin-panel {
+    flex: 1;
+    max-width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+.table-responsive {
+    flex: 1;
+}
