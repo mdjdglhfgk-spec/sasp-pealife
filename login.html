@@ -2,20 +2,14 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>SASP — Accès Sécurisé</title>
+    <title>SASP — Accès Restreint</title>
     <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="img/badge-sasp.png">
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="login-body">
 
-    <!-- Filigrane de fond -->
-    <div class="login-watermark">
-        <img src="img/badge-sasp.png" alt="">
-    </div>
-
     <div class="login-wrapper">
-        <!-- Carte de connexion -->
         <div class="login-card">
             <div class="login-header">
                 <div class="login-logo">
@@ -28,7 +22,7 @@
             <form id="loginForm">
                 <div class="form-group">
                     <label>Email Administrateur</label>
-                    <input type="email" id="email" required placeholder="agent@sasp.gov">
+                    <input type="email" id="email" required placeholder="agent@sasp.com">
                 </div>
                 <div class="form-group">
                     <label>Mot de passe</label>
@@ -73,7 +67,7 @@
             } else {
                 msg.className = 'status-message success';
                 msg.textContent = "Authentification validée. Redirection...";
-                setTimeout(() => window.location.href = 'admin.html', 1000);
+                setTimeout(() => window.location.href = 'admin.html', 800);
             }
         });
     </script>
