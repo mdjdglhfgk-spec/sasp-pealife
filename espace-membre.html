@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>SASP — Espace Membre</title>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="img/badge-sasp.png">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="admin-body" style="background: var(--bg-dark); overflow-y: auto; display: block;">
+
+    <!-- ÉCRAN DE CHARGEMENT (Sécurité) -->
+    <div id="loadingScreen" class="loading-screen" style="position: fixed; inset: 0; background: var(--bg-darker); z-index: 9999; display: flex; align-items: center; justify-content: center;">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- CONTENU -->
+    <div id="membreContent" style="display: none; max-width: 1200px; margin: 0 auto; padding: 100px 20px 60px;">
+        
+        <div style="text-align: center; margin-bottom: 50px;">
+            <h1 style="font-family: var(--font-heading); font-size: 3.5rem; color: var(--gold); text-transform: uppercase; margin-bottom: 10px;">Espace Membre</h1>
+            <p style="color: var(--text-muted); font-size: 1.1rem;">Accès réservé au personnel du San Andreas State Police.</p>
+            <a href="#" id="logoutBtn" style="display: inline-block; margin-top: 20px; color: var(--error); text-decoration: underline; font-weight: 600;">Se déconnecter</a>
+        </div>
+
+        <!-- GRILLE DE LIENS -->
+        <div class="cards-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
+            
+            <a href="annonces.html" class="card" style="text-decoration: none; text-align: center; padding: 40px 20px;">
+                <div style="font-size: 3rem; margin-bottom: 15px;">📢</div>
+                <h3 style="color: var(--gold);">Annonces Officielles</h3>
+                <p style="color: var(--text-muted); margin-top: 10px;">Lire les communications du commandement.</p>
+            </a>
+
+            <a href="academy.html" class="card" style="text-decoration: none; text-align: center; padding: 40px 20px;">
+                <div style="font-size: 3rem; margin-bottom: 15px;">🎓</div>
+                <h3 style="color: var(--gold);">Police Academy</h3>
+                <p style="color: var(--text-muted); margin-top: 10px;">Consulter le planning des formations.</p>
+            </a>
+
+            <a href="page.html?slug=procedure" class="card" style="text-decoration: none; text-align: center; padding: 40px 20px;">
+                <div style="font-size: 3rem; margin-bottom: 15px;">📋</div>
+                <h3 style="color: var(--gold);">Procédures Opérationnelles</h3>
+                <p style="color: var(--text-muted); margin-top: 10px;">Manuel des procédures du SASP.</p>
+            </a>
+
+            <a href="page.html?slug=division" class="card" style="text-decoration: none; text-align: center; padding: 40px 20px;">
+                <div style="font-size: 3rem; margin-bottom: 15px;">🛡️</div>
+                <h3 style="color: var(--gold);">Les Divisions du SASP</h3>
+                <p style="color: var(--text-muted); margin-top: 10px;">Découvrir les différentes unités.</p>
+            </a>
+
+            <a href="page.html?slug=reglement" class="card" style="text-decoration: none; text-align: center; padding: 40px 20px;">
+                <div style="font-size: 3rem; margin-bottom: 15px;">⚖️</div>
+                <h3 style="color: var(--gold);">Règlement Intérieur</h3>
+                <p style="color: var(--text-muted); margin-top: 10px;">Les règles de la faction.</p>
+            </a>
+
+            <a href="page.html?slug=rookie" class="card" style="text-decoration: none; text-align: center; padding: 40px 20px;">
+                <div style="font-size: 3rem; margin-bottom: 15px;">📖</div>
+                <h3 style="color: var(--gold);">Manuel du Rookie</h3>
+                <p style="color: var(--text-muted); margin-top: 10px;">Le guide de survie des nouvelles recrues.</p>
+            </a>
+
+            <a href="page.html?slug=agents" class="card" style="text-decoration: none; text-align: center; padding: 40px 20px;">
+                <div style="font-size: 3rem; margin-bottom: 15px;">👮</div>
+                <h3 style="color: var(--gold);">Manuel des Agents</h3>
+                <p style="color: var(--text-muted); margin-top: 10px;">Procédures pour les agents confirmés.</p>
+            </a>
+
+        </div>
+    </div>
+
+    <script type="module">
+        import { supabase } from './js/supabase.js';
+
+        // Sécurité
+        async function checkAuth() {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                window.location.replace('login.html');
+                return false;
+            }
+            document.getElementById('loadingScreen').style.display = 'none';
+            document.getElementById('membreContent').style.display = 'block';
+            return true;
+        }
+
+        checkAuth();
+
+        // Déconnexion
+        document.getElementById('logoutBtn').addEventListener('click', async (e) => {
+            e.preventDefault();
+            await supabase.auth.signOut();
+            window.location.replace('login.html');
+        });
+    </script>
+</body>
+</html>
