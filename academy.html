@@ -6,6 +6,19 @@
     <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="img/badge-sasp.png">
     <link rel="stylesheet" href="css/style.css">
+    <script type="module">
+    import { supabase } from './js/supabase.js';
+    
+    // On cache la page pour éviter de la voir clignoter
+    document.body.style.visibility = 'hidden';
+    
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+        window.location.replace('login.html');
+    } else {
+        document.body.style.visibility = 'visible';
+    }
+</script>
 </head>
 <body>
 
