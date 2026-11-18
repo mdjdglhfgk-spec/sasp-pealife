@@ -71,7 +71,7 @@
         </div>
     </div>
 
-    <script type="module">
+        <script type="module">
         import { supabase } from './js/supabase.js';
 
         // Sécurité
@@ -79,11 +79,30 @@
             const { data: { session } } = await supabase.auth.getSession();
             if (!session) {
                 window.location.replace('login.html');
-                return false;
+                return;
             }
+            
+            // On affiche le contenu
             document.getElementById('loadingScreen').style.display = 'none';
             document.getElementById('membreContent').style.display = 'block';
-            return true;
+
+            // ==========================================
+            // VÉRIFICATION DU RÔLE (ADMIN)
+            // ==========================================
+            const { data: profile, error } = await supabase
+                .from('profiles')
+                .select('role')
+                .eq('id', session.user.id)
+                .single();
+
+            // Si la requête réussit et que le rôle est 'admin', on montre le bouton
+            if (profile && profile.role === 'admin') {
+                document.getElementById('adminCard').style.display = 'block';
+            }
+            // Si erreur (ex: table profiles n'existe pas), on peut debug
+            if (error) {
+                console.log("Info :", error.message);
+            }
         }
 
         checkAuth();
